@@ -1,0 +1,35 @@
+<div class="main">
+
+    <div class="header"> 
+        <app-connection></app-connection>
+        <div class="aside">
+            <div class="aside-content">
+                <a href="#" (click)="openDeviceDetails()">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-shebei2"></use></svg>
+                    设备详情
+                </a>
+            </div>
+            <div class="aside-content">
+                <a href="#">
+                    <svg class="icon" aria-hidden="true"><use href="#icon-shezhi2"></use></svg>
+                    设置
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <app-inspection-base></app-inspection-base>
+    </div> 
+
+    <ion-menu side="start" menuId="device-details" content-id="content">
+        <ion-header>
+          <ion-toolbar color="primary">
+            <ion-title>设备信息</ion-title>
+          </ion-toolbar>
+        </ion-header>
+        <ion-content id="content">
+            <app-cube-information></app-cube-information>
+        </ion-content>
+    </ion-menu>
+</div>

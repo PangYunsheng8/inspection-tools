@@ -1,0 +1,86 @@
+{
+  "id": "",
+  "name": "",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "3776211",
+      "name": "等待确认",
+      "font_class": "dengdaiqueren",
+      "unicode": "e635",
+      "unicode_decimal": 58933
+    },
+    {
+      "icon_id": "5892566",
+      "name": "设备",
+      "font_class": "shebei",
+      "unicode": "e60c",
+      "unicode_decimal": 58892
+    },
+    {
+      "icon_id": "6000544",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e619",
+      "unicode_decimal": 58905
+    },
+    {
+      "icon_id": "7914199",
+      "name": "icon_断开连接",
+      "font_class": "icon_duankailianjie",
+      "unicode": "e655",
+      "unicode_decimal": 58965
+    },
+    {
+      "icon_id": "8013657",
+      "name": "成功",
+      "font_class": "chenggong",
+      "unicode": "e698",
+      "unicode_decimal": 59032
+    },
+    {
+      "icon_id": "8195638",
+      "name": "设备",
+      "font_class": "shebei1",
+      "unicode": "e634",
+      "unicode_decimal": 58932
+    },
+    {
+      "icon_id": "8467039",
+      "name": "设置",
+      "font_class": "shezhi1",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "8674897",
+      "name": "搜索",
+      "font_class": "BOMbaojia",
+      "unicode": "e61b",
+      "unicode_decimal": 58907
+    },
+    {
+      "icon_id": "9706792",
+      "name": "设置",
+      "font_class": "shezhi2",
+      "unicode": "e607",
+      "unicode_decimal": 58887
+    },
+    {
+      "icon_id": "11045164",
+      "name": "失败",
+      "font_class": "shibai",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
+      "icon_id": "11086001",
+      "name": "设备",
+      "font_class": "shebei2",
+      "unicode": "e61c",
+      "unicode_decimal": 58908
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+.connection-main {
+    display: flex;
+    align-items: center;
+
+    justify-content: center;
+    a {
+        text-decoration: none;
+        color: white;
+
+        .icon {
+            font-size: 18px;
+        }
+    }
+    
+}

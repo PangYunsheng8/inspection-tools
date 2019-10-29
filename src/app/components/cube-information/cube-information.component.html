@@ -1,0 +1,50 @@
+<div class="cube-information-main">
+    <mat-list>
+        <mat-list-item>
+            <div class="item">
+                <span class="key">连接状态:</span>
+                <span class="value">{{connectedState? "已连接("+bleStateService.connectedDevice.name+")": "未连接"}}</span>
+            </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+            <div class="item">
+                <span class="key">产品号:</span>
+                <span class="value">{{pid?.split(' ').reverse().join('')}}</span>
+            </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+            <div class="item">
+                <span class="key">序列号:</span>
+                <span class="value">{{serial?.split(' ').reverse().join('')}}</span>
+            </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+            <div class="item">
+                <span class="key">bootCount:</span>
+                <span class="value"></span>{{bootCount}}
+            </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+            <div class="item">
+                <span class="key">版本号: </span>
+                <span class="value">{{major != null ? major+'.'+minor+'.'+patch : ''}}</span>
+            </div>
+        </mat-list-item>
+        <mat-divider></mat-divider>
+
+        <mat-list-item>
+            <div class="item">
+                <span class="key">剩余电量: </span>
+                <span class="value">{{percentage}}</span>
+            </div>
+        </mat-list-item>
+    </mat-list>
+</div>

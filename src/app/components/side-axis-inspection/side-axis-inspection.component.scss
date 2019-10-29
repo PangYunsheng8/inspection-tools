@@ -1,0 +1,62 @@
+.dynamic-inspection-main {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .cube-face-group {
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+
+        .face {
+            width: 100%;
+            height: 15%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .cube-face {
+            width: 30%;
+            margin: 3px;
+            padding: 0px;
+            border-radius: 10px 5px 10px 5px;
+        }
+
+        .yellow {
+            background-color: yellow;
+            opacity: 0.3;
+        }
+        .orange {
+            background-color: orange;
+            opacity: 0.3;
+        }
+        .blue {
+            background-color: blue;
+            opacity: 0.3;
+        }
+        .red {
+            background-color: red;
+            opacity: 0.3;
+        }
+        .green {
+            background-color: green;
+            opacity: 0.3;
+        }
+        .white {
+            background-color: black;
+            opacity: 0.3;
+        }
+
+        .qualified {
+            color: green;
+        }
+        .failed {
+            color: red;
+        }
+        .notChecked {
+            color: gray;
+        }
+    }
+}

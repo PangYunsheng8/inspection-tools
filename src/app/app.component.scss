@@ -1,0 +1,34 @@
+.main{
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px;
+    background-color: #3880ff;
+
+    .aside {
+        display: flex;
+        justify-content: space-between;
+        .aside-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 3px;
+            padding-left: 15px;
+            
+            a {
+                text-decoration: none;
+                color: white;
+
+                svg {
+                    font-size: 20px;
+                }
+            }
+        }
+    }
+}
