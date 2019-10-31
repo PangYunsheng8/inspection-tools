@@ -12,6 +12,7 @@ import { InspectionBaseComponent } from './components/inspection-base/inspection
 import { StaticInspectionComponent } from './components/static-inspection/static-inspection.component';
 import { DynamicInspectionComponent } from './components/dynamic-inspection/dynamic-inspection.component';
 import { SideAxisInspectionComponent } from './components/side-axis-inspection/side-axis-inspection.component';
+import { InspectionResultComponent } from './components/inspection-result/inspection-result.component';
 import { MaterialModule } from './material.module';
 import { ElModule } from 'element-angular';
 import { IonicModule } from '@ionic/angular';    
@@ -40,7 +41,8 @@ import { Device } from '@ionic-native/device/ngx';
     InspectionBaseComponent,
     StaticInspectionComponent,
     DynamicInspectionComponent,
-    SideAxisInspectionComponent
+    SideAxisInspectionComponent,
+    InspectionResultComponent
   ],
   imports: [
     BrowserModule,

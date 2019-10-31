@@ -25,14 +25,3 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
-
----
-### 日志
-##### 10.26
-休息
-##### 10.27
-写完动态检测中6个侧面轴检测的基本功能
-##### 10.28
-写完布局，标题等
-##### 10.29
-改Network Error的bug，改动态检测bug

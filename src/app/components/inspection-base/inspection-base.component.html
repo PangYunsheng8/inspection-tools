@@ -1,4 +1,4 @@
-<mat-vertical-stepper #stepper>
+<mat-vertical-stepper #stepper (selectionChange)="selectionChange($event)">
     <mat-step>
         <ng-template matStepLabel>静态检查</ng-template>
         <app-static-inspection></app-static-inspection>
@@ -10,7 +10,7 @@
     </mat-step>
 
     <mat-step>
-        <ng-template matStepLabel>查看结果</ng-template>
-        You are now done.
+        <ng-template matStepLabel>检测结果</ng-template>
+        <app-inspection-result></app-inspection-result>
     </mat-step>
 </mat-vertical-stepper>

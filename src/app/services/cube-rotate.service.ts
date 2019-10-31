@@ -62,18 +62,6 @@ export class CubeRotateService {
       console.log(`rotate$ finish!`)
     })
 
-    // throw new Error('还未实现')
-    // this.disconnectAll()
-
-    // this.cubeRotateDetector = new CoderFilter()
-    // this.gpioDataSubscription = $.pipe(
-    //   map(i => this.skProtocalV2.resolveGPIOData(i))
-    // ).subscribe(i => {
-    //   this._gpioData$.next(i)
-    // }, err => {
-    //   this.disconnectAll()
-    // })
-
   }
   public disconnectGPIOData() {
     if (this.gpioDataSubscription) {

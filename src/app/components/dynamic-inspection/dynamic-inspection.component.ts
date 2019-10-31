@@ -1,6 +1,7 @@
 import { Component, OnInit, Input } from '@angular/core';
 
 import { BleInspectionService } from '../../services/ble-inspection.service';
+import { BleStateService } from '../../services/ble-state.service';
 
 @Component({
   selector: 'app-dynamic-inspection',
@@ -10,13 +11,19 @@ import { BleInspectionService } from '../../services/ble-inspection.service';
 export class DynamicInspectionComponent implements OnInit {
 
   constructor(
-    private bleInspectionService: BleInspectionService
+    private bleInspectionService: BleInspectionService,
+    private bleStateService: BleStateService,
   ) { }
   
   public itemIndex: number
   public sideAxisIcon: string = '#icon-dengdaiqueren'
 
   ngOnInit() {
+    this.bleStateService.connectionStatus$.subscribe(connected => {
+      if (!connected) {
+        this.sideAxisIcon = '#icon-dengdaiqueren'
+      }
+    })
   }
 
   public finishedEvent(data) {

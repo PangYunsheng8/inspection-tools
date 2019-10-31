@@ -69,8 +69,16 @@ export class ConnectionComponent implements OnInit {
       await this.bleService.disconnect(this.bleStateService.connectedDevice.id)
     }
     this.ahrsService.disconnectAll()
+    this.clearCurrentState()
     this.connected = false
     this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
+  }
+
+  public clearCurrentState() {
+    this.clearHardwareCurrentState()
+    this.clearBatteryCurrentState()
+    this.clearCoderFilterParamCurrentState()
+    this.clearWorkStateCurrentState()
   }
 
   private connectDataByWorkState(workState: WorkState) {
@@ -114,10 +122,24 @@ export class ConnectionComponent implements OnInit {
     this.bleCurrentStateService.bootCount = bootCount
   }
 
+  public clearHardwareCurrentState() {
+    this.bleCurrentStateService.pid = null
+    this.bleCurrentStateService.serial = null
+    this.bleCurrentStateService.major = null
+    this.bleCurrentStateService.minor = null
+    this.bleCurrentStateService.patch = null
+    this.bleCurrentStateService.bootCount = null
+  }
+
   public async getBatteryInfo() {
     const { voltage, percentage } = await this.bleCommandService.getBatteryInfo()
     this.bleCurrentStateService.voltage = voltage
     this.bleCurrentStateService.percentage = percentage
+  }
+
+  public clearBatteryCurrentState() {
+    this.bleCurrentStateService.voltage = null
+    this.bleCurrentStateService.percentage = null
   }
 
   public async getCoderFilterParam() {
@@ -126,8 +148,17 @@ export class ConnectionComponent implements OnInit {
     this.bleCurrentStateService.axisInterfereCount = axisInterfereCount
   }
 
+  public clearCoderFilterParamCurrentState() {
+    this.bleCurrentStateService.coderErrorCount = null
+    this.bleCurrentStateService.axisInterfereCount = null
+  }
+
   public async getWorkState() {
     this.bleCurrentStateService.workState = await this.bleCommandService.getWorkState()
+  }
+
+  public clearWorkStateCurrentState() {
+    this.bleCurrentStateService.workState = null
   }
 
 }

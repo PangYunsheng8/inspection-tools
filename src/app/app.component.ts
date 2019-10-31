@@ -8,7 +8,9 @@ import { MenuController } from '@ionic/angular';
 })
 export class AppComponent implements OnInit{
   
-  constructor(private menu: MenuController) {}
+  constructor(
+    private menu: MenuController,
+  ) {}
 
   ngOnInit() {
     

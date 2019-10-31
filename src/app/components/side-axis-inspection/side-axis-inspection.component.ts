@@ -10,6 +10,7 @@ import { CubeRotateService } from '../../services/cube-rotate.service';
 import { BleCommandService } from '../../services/ble-command.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleInspectionService } from '../../services/ble-inspection.service';
+import { BleStateService } from '../../services/ble-state.service';
 
 const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白',]
 
@@ -26,6 +27,7 @@ export class SideAxisInspectionComponent implements OnInit {
     private cubeRotateService: CubeRotateService,
     private bleCurrentStateService: BleCurrentStateService,
     private bleInspectionService: BleInspectionService,
+    private bleStateService: BleStateService,
   ) { }
 
   @Output() finishedEvent = new EventEmitter<boolean>();
@@ -55,9 +57,21 @@ export class SideAxisInspectionComponent implements OnInit {
   public rotateSubscription
 
   ngOnInit() {
+
+    this.bleStateService.connectionStatus$.subscribe(connected => {
+      if (connected) { 
+        this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
+      }
+      else if (!connected) {
+        this.clearInspectionItem()
+        this.lastRotateFace = 0
+        this.lastRotateDirection = 1
+        this.hasInspectedItems = 0
+      }
+    })
+
     this.bleInspectionService.dynamicInspectItem$.subscribe(async item => {
       if (item === 1) {
-        this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
         this.subscribeCubeData()
       } else {
         this.unsubscribeCubeData()
@@ -112,14 +126,21 @@ export class SideAxisInspectionComponent implements OnInit {
 
     //判断相同轴上,当前旋转方向是否与上次旋转方向相同
     let currRotateDirection = currRotateCircle > 0? 1: -1
+    console.log(currRotateCircle)
+    // console.log(this.lastRotateDirection + ' | ' + currRotateDirection + ' | ' + currRotateCircle)
     if (this.lastRotateDirection != currRotateDirection && this.lastRotateFace == currRotateFace) {
+      // console.log('!!!')
       if (this.faceItems[this.lastRotateFace].ClockwiseAngle != 360) this.faceItems[this.lastRotateFace].ClockwiseAngle = 0
       if (this.faceItems[this.lastRotateFace].CounterclockwiseAngle != 360) this.faceItems[this.lastRotateFace].CounterclockwiseAngle = 0
     }
     
     //分别记录顺时针和逆时针的旋转角度
     if (currRotateCircle > 0) {
+      // console.log('before')
+      // console.log(this.faceItems[currRotateFace].ClockwiseAngle)
       this.faceItems[currRotateFace].ClockwiseAngle += currRotateCircle/3.6
+      // console.log('after')
+      // console.log(this.faceItems[currRotateFace].ClockwiseAngle)
       if (this.faceItems[currRotateFace].ClockwiseAngle >= 360) this.faceItems[currRotateFace].ClockwiseAngle = 360
     } else {
       this.faceItems[currRotateFace].CounterclockwiseAngle -= currRotateCircle/3.6
@@ -134,6 +155,10 @@ export class SideAxisInspectionComponent implements OnInit {
       this.faceItems[currRotateFace].isInspected = true //这行代码只能放这里，顺序很重要！！
       //判断该轴是否合格
       const { coderErrorCount } = await this.bleCommandService.getCoderFilterParam()
+      console.log('coderErrorCount')
+      console.log(coderErrorCount)
+      console.log('coderErrorCount1')
+      console.log(this.coderErrorCount)
       if (coderErrorCount == this.coderErrorCount) {
         this.faceItems[currRotateFace].inspectionResult = true
         this.faceItems[currRotateFace].description = "合格"
@@ -159,6 +184,13 @@ export class SideAxisInspectionComponent implements OnInit {
       let faceItem = new InspectionDynamicItem()
       faceItem.itemName = AXIS_COLOR_MAP[i]
       this.faceItems.push(faceItem)
+    }
+  }
+
+  public clearInspectionItem() {
+    for (let i = 0; i < 6; i++) {
+      this.faceItems[i] = new InspectionDynamicItem()
+      this.faceItems[i].itemName = AXIS_COLOR_MAP[i]
     }
   }
 

@@ -191,10 +191,12 @@ export class BleBrowserService {
     const rotateReadCharacteristic = await service.getCharacteristic(this.bleConfigService.ROTATE_READ_CHARACTERISTIC_UUID);
     const attitudeReadCharacteristic = await service.getCharacteristic(this.bleConfigService.ATTITUDE_READ_CHARACTERISTIC_UUID);
 
-    (this.bleStateService.devices[deviceId] as BluetoothDevice).addEventListener('gattserverdisconnected', (event) => {
-      this._command$.error(event)
-      this.clearConnection()
-    })
+    // (this.bleStateService.devices[deviceId] as BluetoothDevice).addEventListener('gattserverdisconnected', (event) => {
+    //   this._command$.error(event)
+    //   this.clearConnection()
+    // })
+
+    (this.bleStateService.devices[deviceId] as BluetoothDevice).addEventListener('gattserverdisconnected', this.disconnectCallback)
 
     commandReadCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
       // console.log('command Read Characteristic changed')
@@ -283,5 +285,9 @@ export class BleBrowserService {
     while (outputBuff = this.ptpV2.output()) {
       await this.commandWriteCharacteristic.writeValue(outputBuff) 
     }
+  }
+
+  private disconnectCallback(event) {
+    console.log(event)
   }
 }
