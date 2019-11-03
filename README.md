@@ -74,4 +74,3 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 2. 更新静态检查与查看结果的一致性。当静态检查项目被检查或断开连接时，同时更新检查结果中的信息。
 3. 动态检测逻辑中添加axisInterfereCount参数的影响。如果转动魔方过程中coderErrorCount不变，但是axisInterfereCount发生改变，那么将该轴置为不合格，同时提示用户该轴疑似不良品，建议重新检测。
 4. 添加一些其他的小功能:1)断开连接后，静态检查项目中的图标变为等待。2)在没有连接的状态下，如果用户点击了重新检查或重新检查某个轴的图片，则弹出消息提示框告诉用户没有已连接的设备。
->>>>>>> 85c2bd37069514bb07167affa8808b9279af8d2a
