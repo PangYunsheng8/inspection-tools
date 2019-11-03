@@ -3,6 +3,13 @@
     flex-wrap: wrap;
     justify-content: center;
 
+    .reinspect-btn {
+        width: 100%;
+        height: 25px;
+        padding: 0;
+        margin: 10px 0 0 3px;
+    }
+
     .cube-face-group {
         width: 100%;
         margin: 0;

@@ -19,18 +19,15 @@ export class DynamicInspectionComponent implements OnInit {
   public sideAxisIcon: string = '#icon-dengdaiqueren'
 
   ngOnInit() {
-    this.bleStateService.connectionStatus$.subscribe(connected => {
-      if (!connected) {
-        this.sideAxisIcon = '#icon-dengdaiqueren'
-      }
-    })
   }
 
   public finishedEvent(data) {
-    if (data) {
+    if (data === 'valid') {
       this.sideAxisIcon = '#icon-chenggong'
-    } else {
+    } else if (data === 'invalid'){
       this.sideAxisIcon = '#icon-shibai'
+    } else{
+      this.sideAxisIcon = '#icon-dengdaiqueren'
     }
   }
 

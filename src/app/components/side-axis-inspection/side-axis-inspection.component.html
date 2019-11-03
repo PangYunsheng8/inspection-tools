@@ -2,65 +2,26 @@
     <app-cube class="cube" #cube width="300" height="300"></app-cube>
 
     <div class="cube-face-group">
-        <div class="face">
-            <div class="cube-face yellow" [style.opacity]="faceItems[0].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[0].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[0].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[0].isInspected"
-                [class.qualified]="faceItems[0].inspectionResult"
-                [class.failed]="!faceItems[0].inspectionResult">
-                {{faceItems[0].isInspected? faceItems[0].inspectionResult? "合格" : "不合格" : "未检查"}}
+        <div class="face" *ngFor="let faceItem of faceItems">
+            <div class="cube-face yellow"
+                [style.opacity]="faceItem.isInspecting? 1: 0.3"
+                [class.yellow]="faceItem.face==0"
+                [class.orange]="faceItem.face===1"
+                [class.blue]="faceItem.face===2"
+                [class.red]="faceItem.face===3"
+                [class.green]="faceItem.face===4"
+                [class.white]="faceItem.face===5">
+            </div>
+            <span>顺时针:{{faceItem.ClockwiseAngle}}</span>
+            <span>逆时针:{{faceItem.CounterclockwiseAngle}}</span>
+            <span [class.notChecked]="!faceItem.isInspected"
+                [class.qualified]="faceItem.inspectionResult"
+                [class.failed]="!faceItem.inspectionResult">
+                {{faceItem.isInspected? faceItem.inspectionResult? "合格" : "不合格" : "未检查"}}
             </span>
-        </div>
-        <div class="face">
-            <div class="cube-face orange" [style.opacity]="faceItems[1].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[1].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[1].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[1].isInspected"
-                [class.qualified]="faceItems[1].inspectionResult"
-                [class.failed]="!faceItems[1].inspectionResult">
-                {{faceItems[1].isInspected? faceItems[1].inspectionResult? "合格" : "不合格" : "未检查"}}
-            </span>
-        </div>
-        <div class="face">
-            <div class="cube-face blue" [style.opacity]="faceItems[2].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[2].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[2].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[2].isInspected"
-                [class.qualified]="faceItems[2].inspectionResult"
-                [class.failed]="!faceItems[2].inspectionResult">
-                {{faceItems[2].isInspected? faceItems[2].inspectionResult? "合格" : "不合格" : "未检查"}}
-            </span>
-        </div>
-        <div class="face">
-            <div class="cube-face red" [style.opacity]="faceItems[3].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[3].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[3].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[3].isInspected"
-                [class.qualified]="faceItems[3].inspectionResult"
-                [class.failed]="!faceItems[3].inspectionResult">
-                {{faceItems[3].isInspected? faceItems[3].inspectionResult? "合格" : "不合格" : "未检查"}}
-            </span>
-        </div>
-        <div class="face">
-            <div class="cube-face green" [style.opacity]="faceItems[4].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[4].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[4].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[4].isInspected"
-                [class.qualified]="faceItems[4].inspectionResult"
-                [class.failed]="!faceItems[4].inspectionResult">
-                {{faceItems[4].isInspected? faceItems[4].inspectionResult? "合格" : "不合格" : "未检查"}}
-            </span>
-        </div>
-        <div class="face">
-            <div class="cube-face white" [style.opacity]="faceItems[5].isInspecting? 1: 0.3"></div>
-            <span>顺时针:{{faceItems[5].ClockwiseAngle}}</span>
-            <span>逆时针:{{faceItems[5].CounterclockwiseAngle}}</span>
-            <span [class.notChecked]="!faceItems[5].isInspected"
-                [class.qualified]="faceItems[5].inspectionResult"
-                [class.failed]="!faceItems[5].inspectionResult">
-                {{faceItems[5].isInspected? faceItems[5].inspectionResult? "合格" : "不合格" : "未检查"}}
-            </span>
+            <svg class="icon" aria-hidden="true" (click)="reInspectItem(faceItem.face)"><use href="#icon-caozuo-zhongxinzhihang"></use></svg>
         </div>
     </div>
-  </div>
+
+    <ion-button expand="block" class="reinspect-btn" (click)="reInspectAll()">重新检查</ion-button>
+</div>

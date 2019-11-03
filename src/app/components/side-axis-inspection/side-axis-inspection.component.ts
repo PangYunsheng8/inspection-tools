@@ -2,6 +2,8 @@ import { Component, ViewChild, OnInit, Output, EventEmitter} from '@angular/core
 import { Debug } from 'src/libs/debug';
 import { Quaternion } from 'three';
 import { CubeComponent } from '../cube/cube.component';
+import { ElNotificationService } from 'element-angular';
+import { ElMessageService } from 'element-angular';
 
 import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
 
@@ -11,6 +13,7 @@ import { BleCommandService } from '../../services/ble-command.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleStateService } from '../../services/ble-state.service';
+import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 
 const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白',]
 
@@ -28,9 +31,12 @@ export class SideAxisInspectionComponent implements OnInit {
     private bleCurrentStateService: BleCurrentStateService,
     private bleInspectionService: BleInspectionService,
     private bleStateService: BleStateService,
+    private bleInspectionItemService: BleInspectionItemService,
+    private notify: ElNotificationService,
+    private message: ElMessageService,
   ) { }
 
-  @Output() finishedEvent = new EventEmitter<boolean>();
+  @Output() finishedEvent = new EventEmitter<string>();
 
   @ViewChild('cube')
   cube: CubeComponent;
@@ -57,30 +63,21 @@ export class SideAxisInspectionComponent implements OnInit {
   public rotateSubscription
 
   ngOnInit() {
+    this.initInspectionItem()
 
     this.bleStateService.connectionStatus$.subscribe(connected => {
       if (connected) { 
         this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
-      }
-      else if (!connected) {
+        this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
+      } else if (!connected) {
         this.clearInspectionItem()
-        this.lastRotateFace = 0
-        this.lastRotateDirection = 1
-        this.hasInspectedItems = 0
       }
     })
 
     this.bleInspectionService.dynamicInspectItem$.subscribe(async item => {
-      if (item === 1) {
-        this.subscribeCubeData()
-      } else {
-        this.unsubscribeCubeData()
-      }
-    }, err => {
-      console.log(err)
-    })
-
-    this.initInspectionItem()
+      if (item === 1) this.subscribeCubeData() 
+      else this.unsubscribeCubeData() 
+    }, err => console.log(err))
   }
 
   public subscribeCubeData() {
@@ -126,52 +123,39 @@ export class SideAxisInspectionComponent implements OnInit {
 
     //判断相同轴上,当前旋转方向是否与上次旋转方向相同
     let currRotateDirection = currRotateCircle > 0? 1: -1
-    console.log(currRotateCircle)
-    // console.log(this.lastRotateDirection + ' | ' + currRotateDirection + ' | ' + currRotateCircle)
     if (this.lastRotateDirection != currRotateDirection && this.lastRotateFace == currRotateFace) {
-      // console.log('!!!')
-      if (this.faceItems[this.lastRotateFace].ClockwiseAngle != 360) this.faceItems[this.lastRotateFace].ClockwiseAngle = 0
-      if (this.faceItems[this.lastRotateFace].CounterclockwiseAngle != 360) this.faceItems[this.lastRotateFace].CounterclockwiseAngle = 0
+      if (this.faceItems[this.lastRotateFace].ClockwiseAngle != 360) 
+        this.faceItems[this.lastRotateFace].ClockwiseAngle = 0
+      if (this.faceItems[this.lastRotateFace].CounterclockwiseAngle != 360) 
+        this.faceItems[this.lastRotateFace].CounterclockwiseAngle = 0
     }
     
     //分别记录顺时针和逆时针的旋转角度
     if (currRotateCircle > 0) {
-      // console.log('before')
-      // console.log(this.faceItems[currRotateFace].ClockwiseAngle)
       this.faceItems[currRotateFace].ClockwiseAngle += currRotateCircle/3.6
-      // console.log('after')
-      // console.log(this.faceItems[currRotateFace].ClockwiseAngle)
-      if (this.faceItems[currRotateFace].ClockwiseAngle >= 360) this.faceItems[currRotateFace].ClockwiseAngle = 360
+      if (this.faceItems[currRotateFace].ClockwiseAngle >= 360) 
+        this.faceItems[currRotateFace].ClockwiseAngle = 360
     } else {
       this.faceItems[currRotateFace].CounterclockwiseAngle -= currRotateCircle/3.6
-      if (this.faceItems[currRotateFace].CounterclockwiseAngle >= 360) this.faceItems[currRotateFace].CounterclockwiseAngle = 360
+      if (this.faceItems[currRotateFace].CounterclockwiseAngle >= 360) 
+        this.faceItems[currRotateFace].CounterclockwiseAngle = 360
     }
 
     //判断当前轴是否已经完成了两次360度旋转(一次顺,一次逆),以及当前轴是否没有被检查过,若是则检查该轴
-    if (this.faceItems[currRotateFace].ClockwiseAngle == 360 && 
-      this.faceItems[currRotateFace].CounterclockwiseAngle == 360 && 
+    if (this.faceItems[currRotateFace].ClockwiseAngle === 360 && 
+      this.faceItems[currRotateFace].CounterclockwiseAngle === 360 && 
       !this.faceItems[currRotateFace].isInspected) {
       
       this.faceItems[currRotateFace].isInspected = true //这行代码只能放这里，顺序很重要！！
-      //判断该轴是否合格
-      const { coderErrorCount } = await this.bleCommandService.getCoderFilterParam()
-      console.log('coderErrorCount')
-      console.log(coderErrorCount)
-      console.log('coderErrorCount1')
-      console.log(this.coderErrorCount)
-      if (coderErrorCount == this.coderErrorCount) {
-        this.faceItems[currRotateFace].inspectionResult = true
-        this.faceItems[currRotateFace].description = "合格"
-      } else {
-        this.faceItems[currRotateFace].inspectionResult = false
-        this.faceItems[currRotateFace].description = `${AXIS_COLOR_MAP[currRotateFace]}色面不合格`
-        this.finalResult = false
-      }
-      this.coderErrorCount = coderErrorCount
 
+      //判断该轴是否合格, 如果转动过程中coderErrorCount改变，直接判定为不合格，如果axisInterfereCount改变，提示用户重新检查
+      const { coderErrorCount, axisInterfereCount } = await this.bleCommandService.getCoderFilterParam()
+      this.inspectIsValid(currRotateFace, coderErrorCount, axisInterfereCount)
+
+      this.bleInspectionItemService.faceItems$.next(currRotateFace)
       this.hasInspectedItems += 1
       if (this.hasInspectedItems === 6) {
-        this.finishedEvent.emit(this.finalResult)
+        this.finishedEvent.emit(this.finalResult? "valid": "invalid")
       }
     }
 
@@ -179,20 +163,82 @@ export class SideAxisInspectionComponent implements OnInit {
     this.lastRotateDirection = currRotateDirection
   }
 
-  public initInspectionItem() {
-    for (let i = 0; i < 6; i++){
-      let faceItem = new InspectionDynamicItem()
-      faceItem.itemName = AXIS_COLOR_MAP[i]
-      this.faceItems.push(faceItem)
+  public inspectIsValid(currRotateFace, coderErrorCount, axisInterfereCount) {
+    if (coderErrorCount != this.coderErrorCount) {
+      this.faceItems[currRotateFace].inspectionResult = false
+      this.faceItems[currRotateFace].description = `${AXIS_COLOR_MAP[currRotateFace]}色面不合格`
+      this.finalResult = false
+    } else {
+      if (axisInterfereCount != this.axisInterfereCount) {
+        this.faceItems[currRotateFace].inspectionResult = false
+        this.faceItems[currRotateFace].description = `${AXIS_COLOR_MAP[currRotateFace]}色面疑似不良品，建议重新检查`
+        this.finalResult = false
+        this.notify['warning']('该轴疑似不良品，建议重新检查！')
+      } else {
+        this.faceItems[currRotateFace].inspectionResult = true
+        this.faceItems[currRotateFace].description = "合格"
+      }
     }
+    this.coderErrorCount = coderErrorCount
+    this.axisInterfereCount = axisInterfereCount
   }
 
+  //初始化待检测项目信息
+  public initInspectionItem() {
+    this.faceItems = [
+      this.bleInspectionItemService.faceItem0,
+      this.bleInspectionItemService.faceItem1,
+      this.bleInspectionItemService.faceItem2,
+      this.bleInspectionItemService.faceItem3,
+      this.bleInspectionItemService.faceItem4,
+      this.bleInspectionItemService.faceItem5
+    ]
+  }
+
+  //清除当前检查项目的信息
   public clearInspectionItem() {
     for (let i = 0; i < 6; i++) {
-      this.faceItems[i] = new InspectionDynamicItem()
-      this.faceItems[i].itemName = AXIS_COLOR_MAP[i]
+      this.faceItems[i].isInspected = false
+      this.faceItems[i].inspectionResult = null
+      this.faceItems[i].description = null
+      this.faceItems[i].ClockwiseAngle = 0
+      this.faceItems[i].CounterclockwiseAngle = 0
+      this.bleInspectionItemService.faceItems$.next(i)
+    }
+
+    this.lastRotateFace = 0
+    this.lastRotateDirection = 1
+    this.hasInspectedItems = 0
+    this.finishedEvent.emit("")
+  }
+
+  //重新检查所有轴
+  public reInspectAll() {
+    if (!this.bleStateService.connectedDevice) {
+      this.message.show('未检测到已连接的魔方，请连接！')
+    } else {
+      this.clearInspectionItem()
+      this.finalResult = true
     }
   }
 
+  //重新检查某一个轴
+  public reInspectItem(face) {
+    if (!this.bleStateService.connectedDevice) {
+      this.message.show('未检测到已连接的魔方，请连接！')
+    } else {
+      if (this.faceItems[face].isInspected) {
+        this.faceItems[face].isInspected = false
+        this.faceItems[face].inspectionResult = null
+        this.faceItems[face].description = null
+        this.faceItems[face].ClockwiseAngle = 0
+        this.faceItems[face].CounterclockwiseAngle = 0
+        this.bleInspectionItemService.faceItems$.next(face)
+
+        this.hasInspectedItems -= 1
+        this.finishedEvent.emit("")
+      }
+    }
+  }
 }
 

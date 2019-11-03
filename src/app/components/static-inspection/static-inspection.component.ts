@@ -7,6 +7,7 @@ import { BleValidService } from '../../services/ble-valid.service';
 import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleStateService } from '../../services/ble-state.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
+import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 
 @Component({
   selector: 'app-static-inspection',
@@ -20,33 +21,31 @@ export class StaticInspectionComponent implements OnInit {
     private bleInspectionService: BleInspectionService,
     private bleStateService: BleStateService,
     private bleCurrentStateService: BleCurrentStateService,
+    private bleInspectionItemService: BleInspectionItemService,
   ) { }
 
   //电池电压
-  public voltageItem: InspectionStaticItem = new InspectionStaticItem()
-  //九轴校准参数
-  public accelerometerParam: string
-  public gyroscopeParam: string
-  public magnetometerParam: string
-  //魔方状态
-  public cubeState: number
-
+  public voltageItem: InspectionStaticItem
   public voltageIcon: string = "#icon-dengdaiqueren"
 
   ngOnInit() {
-    this.inspectAll()
-  }
+    this.initInspectionItem()
 
-  public async inspectAll() {
-    this.bleStateService.connectionStatus$.subscribe(async connected => {
+    this.bleStateService.connectionStatus$.subscribe(connected => {
       if (connected) {
-        await this.inspectVoltage()
+        this.inspectAll()
+      } else if (!connected) {
+        this.clearInspectionItem()
+        this.voltageIcon = "#icon-dengdaiqueren"
       }
     })
   }
 
+  public async inspectAll() {
+    await this.inspectVoltage()
+  }
+
   public async inspectVoltage() {
-    this.voltageItem.itemName = "voltage"
     this.voltageItem.currentState = this.bleCurrentStateService.voltage
     this.voltageItem.validState = this.bleValidService.VOLTAGE_VALID
     this.voltageItem.isInspecting = true
@@ -61,6 +60,24 @@ export class StaticInspectionComponent implements OnInit {
 
     if (this.voltageItem.inspectionResult) this.voltageIcon = "#icon-chenggong"
     else this.voltageIcon = "#icon-shibai"
+
+    this.bleInspectionItemService.staticItem$.next(this.voltageItem.id)
+  }
+
+  //初始化待检测项目信息
+  public initInspectionItem() {
+    this.voltageItem = this.bleInspectionItemService.voltageItem
+  }
+
+  //清除当前检查项目的信息
+  public clearInspectionItem() {
+    this.bleInspectionItemService.voltageItem.isInspected = false
+    this.bleInspectionItemService.voltageItem.inspectionResult = null
+    this.bleInspectionItemService.voltageItem.description = null
+    this.bleInspectionItemService.voltageItem.currentState = null
+    this.bleInspectionItemService.voltageItem.validState = null
+
+    this.bleInspectionItemService.staticItem$.next(this.voltageItem.id)
   }
 
 }

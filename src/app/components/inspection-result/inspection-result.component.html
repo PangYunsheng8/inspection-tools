@@ -6,8 +6,7 @@
     </ion-item>
 
     <ion-card-content>
-      <ion-label class="item">未检测项目1</ion-label>
-      <ion-label class="item">未检测项目2</ion-label>
+      <ion-label class="item" *ngFor="let notInspectedItem of notInspectedItems">{{notInspectedItem.itemName}}</ion-label>
     </ion-card-content>
   </ion-card>
 
@@ -17,8 +16,7 @@
     </ion-item>
 
     <ion-card-content>
-      <ion-label class="item">未检测项目1</ion-label>
-      <ion-label class="item">未检测项目2</ion-label>
+      <ion-label class="item" *ngFor="let InspectedValidItem of InspectedValidItems">{{InspectedValidItem.itemName}}</ion-label>
     </ion-card-content>
   </ion-card>
 
@@ -28,8 +26,7 @@
     </ion-item>
 
     <ion-card-content>
-      <ion-label class="item">未检测项目1</ion-label>
-      <ion-label class="item">未检测项目2</ion-label>
+      <ion-label class="item" *ngFor="let InspectedInvalidItem of InspectedInvalidItems">{{InspectedInvalidItem.itemName}}</ion-label>
     </ion-card-content>
   </ion-card>
 </div>

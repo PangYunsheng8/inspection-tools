@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ElMessageService } from 'element-angular';
 
 import { BleStateService } from '../../services/ble-state.service';

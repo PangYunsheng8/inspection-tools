@@ -69,6 +69,13 @@
       "unicode_decimal": 58887
     },
     {
+      "icon_id": "10813083",
+      "name": "重新执行",
+      "font_class": "caozuo-zhongxinzhihang",
+      "unicode": "e603",
+      "unicode_decimal": 58883
+    },
+    {
       "icon_id": "11045164",
       "name": "失败",
       "font_class": "shibai",
