@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { Buffer } from 'buffer'
+import { Buffer } from 'buffer';
 import { Debug } from 'src/libs/debug';
 import { bufferToHex } from 'src/libs/utils';
 import { environment } from 'src/environments/environment';
@@ -8,6 +8,7 @@ import { environment } from 'src/environments/environment';
 import { BleStateService, BleDeviceInfo } from './ble-state.service';
 import { BleBrowserService } from './ble-browser.service';
 import { BleNativeService } from './ble-native.service';
+import { DfuProgress } from '../../libs/nrf-dfu';
 
 @Injectable({
   providedIn: 'root'
@@ -72,6 +73,22 @@ export class BleService {
       return this.bleBrowserService.send(buff)
     } else {
       return this.bleNativeService.send(buff)
+    }
+  }
+
+  public get otaProgress$(): Observable<DfuProgress> {
+    if (environment.usingWebtooth) {
+      return this.bleBrowserService.otaProgress$
+    } else {
+      return this.bleNativeService.otaProgress$
+    }
+  }
+
+  public async ota(otaFileBuffer: Buffer, mtu: number): Promise<void> {
+    if (environment.usingWebtooth) {
+      return this.bleBrowserService.ota(otaFileBuffer, mtu)
+    } else {
+      return this.bleNativeService.ota(otaFileBuffer, mtu)
     }
   }
 }

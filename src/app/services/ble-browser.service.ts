@@ -4,6 +4,7 @@ import { PTPV2 } from 'src/libs/ptp-v2';
 import { Debug } from 'src/libs/debug';
 import { bufferToHex } from 'src/libs/utils';
 import { Buffer } from 'buffer';
+import { getUpdatesFromZipFileBytes, DfuTransportAnyBle, DfuOperation, DfuProgress } from 'src/libs/nrf-dfu';
 
 import { BleStateService } from './ble-state.service';
 import { BleConfigService } from './ble-config.service';
@@ -153,12 +154,17 @@ export class BleBrowserService {
 
   private commandWriteCharacteristic: BluetoothRemoteGATTCharacteristic
 
+  private otaService: BluetoothRemoteGATTService = null
+  private _otaProgress$ = new Subject<DfuProgress>()
+
+  public that = this
+
   //根据指定前缀扫描外围设备
   public async startScan(namePrefix: string): Promise<Observable<BluetoothDevice>> {
     this.bleStateService.scanning = true
     const device = await bluetooth.requestDevice({
       filters: [{ namePrefix }],
-      optionalServices: [this.bleConfigService.SERVICE_UUID]
+      optionalServices: [this.bleConfigService.DATA_SERVICE_UUID, this.bleConfigService.OTA_SERVICE_UUID]
     });
     this.bleStateService.devices[device.id] = device
     const subject = new Subject<BluetoothDevice>()
@@ -184,40 +190,33 @@ export class BleBrowserService {
     //连接外设上的gatt server
     const server = await (this.bleStateService.devices[deviceId] as BluetoothDevice).gatt.connect()
     //获得service
-    const service = await server.getPrimaryService(this.bleConfigService.SERVICE_UUID)
+    const dataService = await server.getPrimaryService(this.bleConfigService.DATA_SERVICE_UUID)
+    this.otaService = await server.getPrimaryService(this.bleConfigService.OTA_SERVICE_UUID)
     //获得4个charateristic
-    this.commandWriteCharacteristic = await service.getCharacteristic(this.bleConfigService.COMMAND_WRITE_CHARACTERISTIC_UUID);
-    const commandReadCharacteristic = await service.getCharacteristic(this.bleConfigService.COMMAND_READ_CHARACTERISTIC_UUID);
-    const rotateReadCharacteristic = await service.getCharacteristic(this.bleConfigService.ROTATE_READ_CHARACTERISTIC_UUID);
-    const attitudeReadCharacteristic = await service.getCharacteristic(this.bleConfigService.ATTITUDE_READ_CHARACTERISTIC_UUID);
-
-    // (this.bleStateService.devices[deviceId] as BluetoothDevice).addEventListener('gattserverdisconnected', (event) => {
-    //   this._command$.error(event)
-    //   this.clearConnection()
-    // })
+    this.commandWriteCharacteristic = await dataService.getCharacteristic(this.bleConfigService.COMMAND_WRITE_CHARACTERISTIC_UUID);
+    const commandReadCharacteristic = await dataService.getCharacteristic(this.bleConfigService.COMMAND_READ_CHARACTERISTIC_UUID);
+    const rotateReadCharacteristic = await dataService.getCharacteristic(this.bleConfigService.ROTATE_READ_CHARACTERISTIC_UUID);
+    const attitudeReadCharacteristic = await dataService.getCharacteristic(this.bleConfigService.ATTITUDE_READ_CHARACTERISTIC_UUID);
 
     (this.bleStateService.devices[deviceId] as BluetoothDevice).addEventListener('gattserverdisconnected', this.disconnectCallback)
 
     commandReadCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
-      // console.log('command Read Characteristic changed')
       const buff = Buffer.from(event.target.value.buffer) 
       this.ptpV2.input(buff)
       let recv: Buffer | null
       while (recv = this.ptpV2.receive()) {
         this._command$.next(recv) 
-        // Debug.receive(bufferToHex(recv))
+        Debug.receive(bufferToHex(recv))
       }
     })
 
     rotateReadCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
-      // console.log('rotate Read Characteristic changed')
       const buff = Buffer.from(event.target.value.buffer)
       this._rotate$.next(buff)
       // Debug.rotate(bufferToHex(buff))
     })
 
     attitudeReadCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
-      // console.log('attitude Read Characteristic changed')
       const buff = Buffer.from(event.target.value.buffer)
       this._attitude$.next(buff)
       // Debug.attitude(bufferToHex(buff))
@@ -228,7 +227,7 @@ export class BleBrowserService {
     await attitudeReadCharacteristic.startNotifications()
 
     if (enableDebug) {
-      const debugCharacteristic = await service.getCharacteristic(this.bleConfigService.DEBUG_CHARACTERISTIC_UUID)
+      const debugCharacteristic = await dataService.getCharacteristic(this.bleConfigService.DEBUG_CHARACTERISTIC_UUID)
       debugCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
         const buff = Buffer.from(event.target.value.buffer)
         Debug.debugInfo(buff.toString())
@@ -250,6 +249,7 @@ export class BleBrowserService {
     this.ptpV2 = null
     this.bleStateService.connectedDevice = null
     this.commandWriteCharacteristic = null
+    this.otaService = null
     if (this._command$) {
       this._command$.complete()
       this._command$ = null
@@ -276,6 +276,10 @@ export class BleBrowserService {
     return this._attitude$
   }
 
+  public get otaProgress$(): Observable<DfuProgress> {
+    return this._otaProgress$
+  }
+
   public async send(buff: Buffer): Promise<void> {
     if (!this.bleStateService.connected) {
       throw new Error('还未连接设备，请先连接设备再发送数据')
@@ -287,7 +291,44 @@ export class BleBrowserService {
     }
   }
 
-  private disconnectCallback(event) {
-    console.log(event)
+  public disconnectCallback = (event) => {
+    this._command$.error(event)
+    this.clearConnection()
+    this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
+  }
+
+  public async ota(otaFileBuffer: Buffer, mtu: number) {
+    const receiveData$ = new Subject<Buffer>()
+
+    let dfuControlCharacteristic: BluetoothRemoteGATTCharacteristic
+    let dfuPacketCharacteristic: BluetoothRemoteGATTCharacteristic
+
+    const prepareBle = async () => {
+      dfuControlCharacteristic = await this.otaService.getCharacteristic(this.bleConfigService.DFU_CONTROL_CHARACTERISTIC_UUID)
+      dfuPacketCharacteristic = await this.otaService.getCharacteristic(this.bleConfigService.DFU_PACKET_CHARACTERISTIC_UUID)
+      dfuControlCharacteristic.addEventListener('characteristicvaluechanged', (event: any) => {
+        const buff = Buffer.from(event.target.value.buffer)
+        receiveData$.next(buff)
+      })
+      await dfuControlCharacteristic.startNotifications()
+    }
+
+    const writeCommandImpl = async (buff: Buffer) => {
+      await dfuControlCharacteristic.writeValue(buff)
+    }
+    const writeDataImpl = async (buff: Buffer) => {
+      await dfuPacketCharacteristic.writeValue(buff)
+    }
+
+    const onProgress = (stage: number, sendBytes: number, totalBytes: number) => {
+      this._otaProgress$.next({ stage, sendBytes, totalBytes })
+    }
+
+    const updates = await getUpdatesFromZipFileBytes(otaFileBuffer)
+    const bleTransport = new DfuTransportAnyBle(prepareBle, writeCommandImpl, writeDataImpl, receiveData$, mtu, onProgress)
+
+    const dfu = new DfuOperation(updates, bleTransport);
+    await dfu.start(true)
+
   }
 }

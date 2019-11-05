@@ -27,7 +27,7 @@ export class ConnectionComponent implements OnInit {
   ) {}
 
   public connecting = false
-  public connected = false
+  // public connected = false
   public namePrefix = 'MHC'
 
   public enableDebug = true
@@ -47,7 +47,7 @@ export class ConnectionComponent implements OnInit {
     try {
       this.connecting = true
       await this.bleService.connect(device.id, this.enableDebug)
-      this.connected = true
+      // this.connected = true
     } catch (err) {
       alert(`连接失败！请重试！原因:${err}`)
       return
@@ -70,7 +70,7 @@ export class ConnectionComponent implements OnInit {
     }
     this.ahrsService.disconnectAll()
     this.clearCurrentState()
-    this.connected = false
+    // this.connected = false
     this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
   }
 

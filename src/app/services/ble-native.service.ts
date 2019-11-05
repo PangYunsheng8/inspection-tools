@@ -3,10 +3,11 @@ import { Observable, Subject, Subscription, Subscriber } from 'rxjs'
 import { BLE } from '@ionic-native/ble/ngx'
 import { filter, tap, flatMap, map } from 'rxjs/operators';
 import { PTPV2 } from 'src/libs/ptp-v2';
-import { Buffer } from 'buffer'
-import toArrayBuffer from 'to-arraybuffer'
-import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx'
-import { Device } from '@ionic-native/device/ngx'
+import { Buffer } from 'buffer';
+import toArrayBuffer from 'to-arraybuffer';
+import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
+import { Device } from '@ionic-native/device/ngx';
+import { DfuProgress } from 'src/libs/nrf-dfu';
 
 import { BleStateService, BleDeviceInfo } from './ble-state.service';
 import { BleConfigService } from './ble-config.service';
@@ -67,7 +68,7 @@ export class BleNativeService {
 
           this._command$ = this.ble.startNotification(
             deviceId,
-            this.bleConfigService.SERVICE_UUID.toString(16),
+            this.bleConfigService.DATA_SERVICE_UUID.toString(16),
             this.bleConfigService.COMMAND_READ_CHARACTERISTIC_UUID.toString(16)
           ).pipe(
             flatMap(i => {
@@ -83,7 +84,7 @@ export class BleNativeService {
 
           this._rotate$ = this.ble.startNotification(
             deviceId,
-            this.bleConfigService.SERVICE_UUID.toString(16),
+            this.bleConfigService.DATA_SERVICE_UUID.toString(16),
             this.bleConfigService.ROTATE_READ_CHARACTERISTIC_UUID.toString(16)
           ).pipe(
             map(i => Buffer.from(i))
@@ -91,7 +92,7 @@ export class BleNativeService {
 
           this._attitude$ = this.ble.startNotification(
             deviceId,
-            this.bleConfigService.SERVICE_UUID.toString(16),
+            this.bleConfigService.DATA_SERVICE_UUID.toString(16),
             this.bleConfigService.ATTITUDE_READ_CHARACTERISTIC_UUID.toString(16)
           ).pipe(
             map(i => Buffer.from(i))
@@ -138,6 +139,10 @@ export class BleNativeService {
     return this._attitude$
   }
 
+  public get otaProgress$(): Observable<DfuProgress> {
+    return null
+  } 
+
   public async send(buff: Buffer): Promise<void> {
     if (!this.bleStateService.connected) {
       throw new Error('还未连接设备，请先连接设备再发送数据')
@@ -147,10 +152,14 @@ export class BleNativeService {
     while (outputBuff = this.ptpV2.output()) {
       await this.ble.writeWithoutResponse(
         this.bleStateService.connectedDevice.id,
-        this.bleConfigService.SERVICE_UUID.toString(16),
+        this.bleConfigService.DATA_SERVICE_UUID.toString(16),
         this.bleConfigService.COMMAND_WRITE_CHARACTERISTIC_UUID.toString(16),
         toArrayBuffer(outputBuff)
       )
     }
+  }
+
+  public async ota(otaFileBuffer: Buffer, mtu: number) {
+    
   }
 }

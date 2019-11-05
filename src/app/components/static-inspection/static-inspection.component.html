@@ -4,7 +4,7 @@
         <el-collapse-item label="电压" value="1">
             <div>{{voltageItem.inspectionResult}}</div>
         </el-collapse-item>
-        </div>
+    </div>
     <div class="item-container">
         <svg class="icon" aria-hidden="九轴校准参数"><use href="#icon-dengdaiqueren"></use></svg>
         <el-collapse-item label="初始化逻辑魔方状态" value="2">
@@ -13,6 +13,27 @@
     <div class="item-container">
         <svg class="icon" aria-hidden="true"><use href="#icon-dengdaiqueren"></use></svg>
         <el-collapse-item label="OAD版本" value="3">
+            <div></div>
+            <div class="oad-container">
+                <!-- <el-upload class="oad-upload" #uploadInput action="" accept=".zip">
+                    <ng-template #trigger><el-button size="middle" type="primary">选择文件</el-button></ng-template>
+                    <ng-template #tip><div class="el-upload__tip">只能上传.oad文件</div></ng-template>
+                </el-upload> -->
+                <div class="file-input-container">
+                    <input #uploadInput type="file" accept=".zip"/>
+                </div>
+
+                <el-select class="oad-select" placeholder="请选择传输包大小" (modelChange)="handle($event)" [disabled]="otaing">
+                    <el-option label="小包(20 Bytes)" value="20"></el-option>
+                    <el-option label="中包(80 Bytes)" value="80"></el-option>
+                    <el-option label="中包(120 Bytes)" value="120"></el-option>
+                    <el-option label="大包(230 Bytes)" value="230"></el-option>
+                </el-select>
+
+                <div class="oad-upgrade"><el-button type="primary" (click)="startOTA()">开始升级</el-button></div>
+                <mat-progress-bar [mode]="otaProgressMode" [value]="otaProgressValue"></mat-progress-bar>
+                <div class="oad-speed" *ngIf="otaing">{{otaSpeed | number:'0.2-2'}} kb/s</div>
+            </div>
         </el-collapse-item>
     </div>
     <div class="item-container">
