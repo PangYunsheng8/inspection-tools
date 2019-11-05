@@ -25,8 +25,6 @@ Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protrac
 ## Further help
 
 To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
-<<<<<<< HEAD
-=======
 
 ---
 ### 日志
@@ -66,7 +64,10 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 3. 发现了一个bug。在转动魔方时，朝着同一个方向慢速转，会偶尔出现反方向的circle，造成实际转动角度与动态检测中的角度不匹配的问题。
 原因：底层算法的问题，不属于本工具内的范畴。
 ##### 10.31
+1. 添加了查看检查结果功能。添加了inspection-result的componet。
+2. 重构了检查项目的数据结构。检查项目基类为inspectionBaseItem，动态检查项目为inspectionDynamicItem，静态检查项目为inspectionStaticItem。并创建了bleInspectionItemService来保存这些检查项目。不同的component之间通过bleInspectionItemService来传递变量。
 ##### 11.01
+修改了一些小bug，改了部分变量名等。
 ##### 11.02
 休息
 ##### 11.03
@@ -74,4 +75,4 @@ To get more help on the Angular CLI use `ng help` or go check out the [Angular C
 2. 更新静态检查与查看结果的一致性。当静态检查项目被检查或断开连接时，同时更新检查结果中的信息。
 3. 动态检测逻辑中添加axisInterfereCount参数的影响。如果转动魔方过程中coderErrorCount不变，但是axisInterfereCount发生改变，那么将该轴置为不合格，同时提示用户该轴疑似不良品，建议重新检测。
 4. 添加一些其他的小功能:1)断开连接后，静态检查项目中的图标变为等待。2)在没有连接的状态下，如果用户点击了重新检查或重新检查某个轴的图片，则弹出消息提示框告诉用户没有已连接的设备。
->>>>>>> 85c2bd37069514bb07167affa8808b9279af8d2a
+5. 看OAD部分代码。
