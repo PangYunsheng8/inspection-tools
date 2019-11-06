@@ -1,9 +1,10 @@
 export class InspectionBaseItem {
-    constructor(itemName: string) {
+    constructor(itemId: number, itemName: string) {
+        this.itemId = itemId
         this.itemName = itemName
     }
+    itemId: number
     itemName: string;
-    // itemDisplayName: string;
     isInspecting: boolean = false;
     isInspected: boolean = false;
     inspectionResult: boolean;

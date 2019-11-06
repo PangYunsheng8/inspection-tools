@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { SideAxisInspectionComponent } from './side-axis-inspection.component';
+import { CubeContainerComponent } from './cube-container.component';
 
-describe('SideAxisInspectionComponent', () => {
-  let component: SideAxisInspectionComponent;
-  let fixture: ComponentFixture<SideAxisInspectionComponent>;
+describe('CubeContainerComponent', () => {
+  let component: CubeContainerComponent;
+  let fixture: ComponentFixture<CubeContainerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ SideAxisInspectionComponent ]
+      declarations: [ CubeContainerComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(SideAxisInspectionComponent);
+    fixture = TestBed.createComponent(CubeContainerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

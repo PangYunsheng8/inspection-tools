@@ -1,0 +1,13 @@
+<mat-list>
+    <mat-list-item>
+        <div class="item"><span>项目名称:</span><span>{{identityItem.itemName}}</span></div>
+    </mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>
+        <div class="item"><span>检查结果:</span><span>{{identityItem.inspectionResult===true? "合格" : identityItem.inspectionResult===false? "不合格": ""}}</span></div>
+    </mat-list-item>
+    <mat-divider></mat-divider>
+    <mat-list-item>
+        <div class="item"><span>其他:</span><span>{{identityItem.description}}</span></div>
+    </mat-list-item>
+</mat-list>

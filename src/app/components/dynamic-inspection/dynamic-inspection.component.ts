@@ -16,18 +16,18 @@ export class DynamicInspectionComponent implements OnInit {
   ) { }
   
   public itemIndex: number
-  public sideAxisIcon: string = '#icon-dengdaiqueren'
+  public axisIcon: string = '#icon-dengdaiqueren'
 
   ngOnInit() {
   }
 
   public finishedEvent(data) {
     if (data === 'valid') {
-      this.sideAxisIcon = '#icon-chenggong'
+      this.axisIcon = '#icon-chenggong'
     } else if (data === 'invalid'){
-      this.sideAxisIcon = '#icon-shibai'
+      this.axisIcon = '#icon-shibai'
     } else{
-      this.sideAxisIcon = '#icon-dengdaiqueren'
+      this.axisIcon = '#icon-dengdaiqueren'
     }
   }
 

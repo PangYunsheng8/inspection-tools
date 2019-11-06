@@ -152,15 +152,15 @@ export class BleCommandService {
       this.bleService.send(buffer)
     })
   }
-  public async getCubeState(): Promise<HardwareCubeState> {
-    return new Promise<HardwareCubeState>((resolve, reject) => {
+  public async setCubeState(cubeState: HardwareCubeState): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
       const skProtocolV2 = SkProtocolV2.getInstance()
-      const { buffer, currId } = skProtocolV2.encodeCommand(Command.CUBE_STATE, false)
+      const { buffer, currId } = skProtocolV2.encodeCommand(Command.CUBE_STATE, true, cubeState)
       const subscription = this.bleService.command$.pipe(
-        map(i => skProtocolV2.resolveCommand(i)),
-        filter(i => i.header.command === Command.CUBE_STATE && i.header.id === currId)
+        map(i => skProtocolV2.resolveCommandHeader(i)),
+        filter(i => i.command === Command.CUBE_STATE && i.id === currId)
       ).subscribe(i => {
-        resolve(i as HardwareCubeState)
+        resolve()
         subscription.unsubscribe()
       })
       this.bleService.send(buffer)
@@ -175,6 +175,20 @@ export class BleCommandService {
         filter(i => i.header.command === Command.SENSORS_CALIBRATION_PARAM && i.header.id === currId)
       ).subscribe(i => {
         resolve(i as SensorsCalibrationParam)
+        subscription.unsubscribe()
+      })
+      this.bleService.send(buffer)
+    })
+  }
+  public async setSensorsCalibrationParam(sensorsCalibrationParam: SensorsCalibrationParam): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const skProtocolV2 = SkProtocolV2.getInstance()
+      const { buffer, currId } = skProtocolV2.encodeCommand(Command.SENSORS_CALIBRATION_PARAM, true, sensorsCalibrationParam)
+      const subscription = this.bleService.command$.pipe(
+        map(i => skProtocolV2.resolveCommandHeader(i)),
+        filter(i => i.command === Command.SENSORS_CALIBRATION_PARAM && i.id === currId)
+      ).subscribe(i => {
+        resolve()
         subscription.unsubscribe()
       })
       this.bleService.send(buffer)

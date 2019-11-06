@@ -2,6 +2,9 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { MaterialModule } from './material.module';
+import { ElModule } from 'element-angular';
+import { IonicModule } from '@ionic/angular';  
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -11,11 +14,15 @@ import { CubeInformationComponent } from './components/cube-information/cube-inf
 import { InspectionBaseComponent } from './components/inspection-base/inspection-base.component';
 import { StaticInspectionComponent } from './components/static-inspection/static-inspection.component';
 import { DynamicInspectionComponent } from './components/dynamic-inspection/dynamic-inspection.component';
-import { SideAxisInspectionComponent } from './components/side-axis-inspection/side-axis-inspection.component';
+import { AxisItemInspectionComponent } from './components/axis-item-inspection/axis-item-inspection.component';
 import { InspectionResultComponent } from './components/inspection-result/inspection-result.component';
-import { MaterialModule } from './material.module';
-import { ElModule } from 'element-angular';
-import { IonicModule } from '@ionic/angular';    
+import { CubeContainerComponent } from './components/cube-container/cube-container.component';
+import { VoltageItemInspectionComponent } from './components/voltage-item-inspection/voltage-item-inspection.component';
+import { CstateItemInspectionComponent } from './components/cstate-item-inspection/cstate-item-inspection.component';
+import { SensorsItemInspectionComponent } from './components/sensors-item-inspection/sensors-item-inspection.component';
+import { IdentityItemInspectionComponent } from './components/identity-item-inspection/identity-item-inspection.component';
+import { FilterItemInspectionComponent } from './components/filter-item-inspection/filter-item-inspection.component';  
+import { OadItemInspectionComponent } from './components/oad-item-inspection/oad-item-inspection.component';
 
 import { BleService } from './services/ble.service';
 import { BleStateService } from './services/ble-state.service';
@@ -24,7 +31,6 @@ import { BleNativeService } from './services/ble-native.service';
 import { BleConfigService } from './services/ble-config.service';
 import { BleCommandService } from './services/ble-command.service';
 import { CubeRotateService } from './services/cube-rotate.service';
-// import { SkInfoService } from './services/sk-info.service';
 import { AttitudeService } from './services/attitude.service';
 import { BleValidService } from './services/ble-valid.service'
 import { BleInspectionService } from './services/ble-inspection.service';
@@ -41,8 +47,15 @@ import { Device } from '@ionic-native/device/ngx';
     InspectionBaseComponent,
     StaticInspectionComponent,
     DynamicInspectionComponent,
-    SideAxisInspectionComponent,
-    InspectionResultComponent
+    AxisItemInspectionComponent,
+    InspectionResultComponent,
+    CubeContainerComponent,
+    OadItemInspectionComponent,
+    CstateItemInspectionComponent,
+    VoltageItemInspectionComponent,
+    SensorsItemInspectionComponent,
+    IdentityItemInspectionComponent,
+    FilterItemInspectionComponent
   ],
   imports: [
     BrowserModule,

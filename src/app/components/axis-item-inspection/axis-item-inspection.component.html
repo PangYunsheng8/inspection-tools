@@ -1,16 +1,14 @@
 <div class="dynamic-inspection-main">
-    <app-cube class="cube" #cube width="300" height="300"></app-cube>
-
     <div class="cube-face-group">
         <div class="face" *ngFor="let faceItem of faceItems">
             <div class="cube-face yellow"
                 [style.opacity]="faceItem.isInspecting? 1: 0.3"
-                [class.yellow]="faceItem.face==0"
-                [class.orange]="faceItem.face===1"
-                [class.blue]="faceItem.face===2"
-                [class.red]="faceItem.face===3"
-                [class.green]="faceItem.face===4"
-                [class.white]="faceItem.face===5">
+                [class.yellow]="faceItem.itemId===0"
+                [class.orange]="faceItem.itemId===1"
+                [class.blue]="faceItem.itemId===2"
+                [class.red]="faceItem.itemId===3"
+                [class.green]="faceItem.itemId===4"
+                [class.white]="faceItem.itemId===5">
             </div>
             <span>顺时针:{{faceItem.ClockwiseAngle}}</span>
             <span>逆时针:{{faceItem.CounterclockwiseAngle}}</span>
@@ -19,7 +17,7 @@
                 [class.failed]="!faceItem.inspectionResult">
                 {{faceItem.isInspected? faceItem.inspectionResult? "合格" : "不合格" : "未检查"}}
             </span>
-            <svg class="icon" aria-hidden="true" (click)="reInspectItem(faceItem.face)"><use href="#icon-caozuo-zhongxinzhihang"></use></svg>
+            <svg class="icon" aria-hidden="true" (click)="reInspectItem(faceItem.itemId)"><use href="#icon-caozuo-zhongxinzhihang"></use></svg>
         </div>
     </div>
 

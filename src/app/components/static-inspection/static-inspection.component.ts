@@ -1,17 +1,14 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { Debug } from 'src/libs/debug';
-import { Buffer } from 'buffer';
-import { filter, map, tap, pairwise, sampleTime } from 'rxjs/operators';
-import { DfuStage } from 'src/libs/nrf-dfu';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { VoltageItemInspectionComponent } from '../../components/voltage-item-inspection/voltage-item-inspection.component';
+import { CstateItemInspectionComponent } from '../../components/cstate-item-inspection/cstate-item-inspection.component';
+import { SensorsItemInspectionComponent } from '../../components/sensors-item-inspection/sensors-item-inspection.component';
+import { FilterItemInspectionComponent } from '../../components/filter-item-inspection/filter-item-inspection.component';
+import { IdentityItemInspectionComponent } from '../../components/identity-item-inspection/identity-item-inspection.component';
+import { OadItemInspectionComponent } from '../../components/oad-item-inspection/oad-item-inspection.component';
 
-import { InspectionStaticItem } from '../../class/inspection-static-item';
-
-import { BleValidService } from '../../services/ble-valid.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleStateService } from '../../services/ble-state.service';
-import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleService } from '../../services/ble.service';
+import { BleInspectionService } from '../../services/ble-inspection.service';
 
 @Component({
   selector: 'app-static-inspection',
@@ -21,139 +18,108 @@ import { BleService } from '../../services/ble.service';
 export class StaticInspectionComponent implements OnInit {
 
   constructor(
-    private bleValidService: BleValidService,
-    private bleInspectionService: BleInspectionService,
     private bleStateService: BleStateService,
-    private bleCurrentStateService: BleCurrentStateService,
     private bleInspectionItemService: BleInspectionItemService,
-    private bleService: BleService
+    private bleInspectionService: BleInspectionService
   ) { }
 
-  @ViewChild('uploadInput')
-  private otaFileInput: ElementRef<HTMLInputElement>
+  @ViewChild('voltageItemInspection')
+  voltageItemInspection: VoltageItemInspectionComponent
 
-  //电池电压
-  public voltageItem: InspectionStaticItem
+  @ViewChild('cstateItemInspection')
+  cstateItemInspection: CstateItemInspectionComponent
+
+  @ViewChild('sensorsItemInspection')
+  sensorsItemInspection: SensorsItemInspectionComponent
+
+  @ViewChild('filterItemInspection')
+  filterItemInspection: FilterItemInspectionComponent
+
+  @ViewChild('identityItemInspection')
+  identityItemInspection: IdentityItemInspectionComponent
+
+  @ViewChild('oadItemInspection')
+  oadItemInspection: OadItemInspectionComponent
+
+  //icon
   public voltageIcon: string = "#icon-dengdaiqueren"
-
-  //oad相关
-  public otaProgressMode: 'indeterminate' | 'determinate' = 'determinate'
-  public otaProgressValue = 0
-  public mtu = 20
-  public otaing = false
-  public otaSpeed: number
+  public cstateIcon: string = "#icon-dengdaiqueren"
+  public sensorsIcon: string = "#icon-dengdaiqueren"
+  public filterIcon: string = "#icon-dengdaiqueren"
+  public identityIcon: string = "#icon-dengdaiqueren"
+  public oadIcon: string = "#icon-dengdaiqueren"
 
   ngOnInit() {
-    this.initInspectionItem()
-
     this.bleStateService.connectionStatus$.subscribe(connected => {
-      if (connected) {
-        this.inspectAll()
-      } else if (!connected) {
-        this.clearInspectionItem()
-        this.voltageIcon = "#icon-dengdaiqueren"
+      if (connected) this.inspectAll()
+      else if (!connected) {
+        this.recoverIcon() 
+        this.clearAll()
       }
-    })
-
-    this.bleService.otaProgress$.subscribe(i => {
-      this.otaProgressMode = i.stage === DfuStage.PREPARE ? 'indeterminate' : 'determinate'
-      this.otaProgressValue = Math.floor(i.sendBytes / i.totalBytes * 100)
-    })
-    this.bleService.otaProgress$.pipe(
-      map(i => i.sendBytes),
-      sampleTime(100),
-      pairwise(),
-      map(i => i[1] - i[0]),
-      filter(i => i >= 0)
-    ).subscribe(i => {
-      this.otaSpeed = i / 1024 * 10
     })
   }
 
   public async inspectAll() {
     await this.inspectVoltage()
+    await this.inspectCstate()
+    await this.inspectSensors()
+    await this.inspectFilter()
+    await this.inspectIdentity()
+    await this.inspectOad()
+  }
+
+  public clearAll() {
+    this.voltageItemInspection.clearInspectionItem()
+    this.cstateItemInspection.clearInspectionItem()
+    this.sensorsItemInspection.clearInspectionItem()
+    this.filterItemInspection.clearInspectionItem()
+    this.identityItemInspection.clearInspectionItem()
+    this.oadItemInspection.clearInspectionItem()
+  }
+
+  public recoverIcon() {
+    this.voltageIcon = "#icon-dengdaiqueren"
+    this.cstateIcon = "#icon-dengdaiqueren"
+    this.sensorsIcon = "#icon-dengdaiqueren"
+    this.filterIcon = "#icon-dengdaiqueren"
+    this.identityIcon = "#icon-dengdaiqueren"
+    this.oadIcon = "#icon-dengdaiqueren"
   }
 
   public async inspectVoltage() {
-    this.voltageItem.currentState = this.bleCurrentStateService.voltage
-    this.voltageItem.validState = this.bleValidService.VOLTAGE_VALID
-    this.voltageItem.isInspecting = true
-    const { result, description } = this.bleInspectionService.inspectVoltage(
-      this.voltageItem.currentState, 
-      this.voltageItem.validState
-    )
-    this.voltageItem.isInspected = true
-    this.voltageItem.isInspecting = false
-    this.voltageItem.inspectionResult = result
-    this.voltageItem.description = description
-
-    if (this.voltageItem.inspectionResult) this.voltageIcon = "#icon-chenggong"
+    await this.voltageItemInspection.inspectVoltage()
+    if (this.bleInspectionItemService.voltageItem.inspectionResult) this.voltageIcon = "#icon-chenggong"
     else this.voltageIcon = "#icon-shibai"
-
-    this.bleInspectionItemService.staticItem$.next(this.voltageItem.id)
   }
 
-  //初始化待检测项目信息
-  public initInspectionItem() {
-    this.voltageItem = this.bleInspectionItemService.voltageItem
+  public async inspectCstate() {
+    await this.cstateItemInspection.inspectCstate()
+    if (this.bleInspectionItemService.cstateItem.inspectionResult) this.cstateIcon = "#icon-chenggong"
+    else this.cstateIcon = "#icon-shibai"
   }
 
-  //清除当前检查项目的信息
-  public clearInspectionItem() {
-    this.bleInspectionItemService.voltageItem.isInspected = false
-    this.bleInspectionItemService.voltageItem.inspectionResult = null
-    this.bleInspectionItemService.voltageItem.description = null
-    this.bleInspectionItemService.voltageItem.currentState = null
-    this.bleInspectionItemService.voltageItem.validState = null
-
-    this.bleInspectionItemService.staticItem$.next(this.voltageItem.id)
+  public async inspectSensors() {
+    await this.sensorsItemInspection.inspectSensors()
+    if (this.bleInspectionItemService.sensorsItem.inspectionResult) this.sensorsIcon = "#icon-chenggong"
+    else this.sensorsIcon = "#icon-shibai"
   }
 
-  public async startOTA() {
-    function getFileBuffer(file: File) {
-      return new Promise<Buffer>((resolve, reject) => {
-        const reader = new FileReader()
-
-        function onLoadEnd(e) {
-          if (reader.removeEventListener) {
-            reader.removeEventListener('loadend', onLoadEnd, false)
-          } else {
-            reader.onloadend = null
-          }
-          if (e.error) reject(e.error)
-          else resolve(Buffer.from(reader.result as ArrayBuffer))
-        }
-
-        if (reader.addEventListener) {
-          reader.addEventListener('loadend', onLoadEnd, false)
-        } else {
-          reader.onloadend = onLoadEnd
-        }
-        reader.readAsArrayBuffer(file)
-      })
-    }
-    let fileBuff
-    try {
-      fileBuff = await getFileBuffer(this.otaFileInput.nativeElement.files[0])
-      console.log(fileBuff)
-      console.log(this.mtu)
-    } catch (err) {
-      return alert('请先选择OTA文件')
-    }
-    try {
-      this.otaing = true
-      await this.bleService.ota(fileBuff, +this.mtu)
-    } catch (err) {
-      alert('OTA 失败,请重试')
-      throw err
-    } finally {
-      this.otaProgressMode = 'determinate'
-      this.otaProgressValue = 0
-      this.otaing = false
-    }
+  public async inspectFilter() {
+    await this.filterItemInspection.inspectFilter()
+    if (this.bleInspectionItemService.filterItem.inspectionResult) this.filterIcon = "#icon-chenggong"
+    else this.filterIcon = "#icon-shibai"
   }
-  
-  public handle(e) {
-    this.mtu = e
+
+  public async inspectIdentity() {
+    await this.identityItemInspection.inspectIdentity()
+    if (this.bleInspectionItemService.identityItem.inspectionResult) this.identityIcon = "#icon-chenggong"
+    else this.identityIcon = "#icon-shibai"
   }
+
+  public async inspectOad() {
+    await this.oadItemInspection.inspectOad()
+    if (this.bleInspectionItemService.oadItem.inspectionResult) this.oadIcon = "#icon-chenggong"
+    else this.oadIcon = "#icon-shibai"
+  }
+
 }

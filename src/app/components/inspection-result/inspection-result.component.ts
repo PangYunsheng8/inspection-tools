@@ -24,17 +24,14 @@ export class InspectionResultComponent implements OnInit {
   public InspectedValidItems: Array<any> = new Array()
   public InspectedInvalidItems: Array<any> = new Array()
 
-  public faceItems: Array<InspectionDynamicItem> = new Array<InspectionDynamicItem>()
-
-  public voltageItem: InspectionStaticItem
+  public inspectionItems: Array<any> = new Array<any>()
 
   ngOnInit() {
     this.initInspectionItem()
 
-    for (let i = 0; i < this.faceItems.length; i++){
-      this.notInspectedItems.push(this.faceItems[i])
+    for (let i = 0; i < this.inspectionItems.length; i++){
+      this.notInspectedItems.push(this.inspectionItems[i])
     }
-    this.notInspectedItems.push(this.voltageItem)
 
     this.bleStateService.connectionStatus$.subscribe(connected => {
       if (!connected) {
@@ -42,62 +39,38 @@ export class InspectionResultComponent implements OnInit {
       }
     })
 
-    this.bleInspectionItemService.faceItems$.subscribe(face => {
-      let isInspected = this.faceItems[face].isInspected
-      let result = this.faceItems[face].inspectionResult
+    this.bleInspectionItemService.inspectionItem$.subscribe(id => {
+      let isInspected = this.inspectionItems[id].isInspected
+      let result = this.inspectionItems[id].inspectionResult
       if (isInspected) {
-        this.notInspectedItems = this.notInspectedItems.filter(i => i.itemName != AXIS_COLOR_MAP[face])
-        if (result) this.InspectedValidItems.push(this.faceItems[face])
-        else this.InspectedInvalidItems.push(this.faceItems[face])
+        this.notInspectedItems = this.notInspectedItems.filter(i => i.itemId != id)
+        if (result) this.InspectedValidItems.push(this.inspectionItems[id])
+        else this.InspectedInvalidItems.push(this.inspectionItems[id])
       } else {
-        this.InspectedValidItems = this.InspectedValidItems.filter(i => i.itemName != AXIS_COLOR_MAP[face])
-        this.InspectedInvalidItems = this.InspectedInvalidItems.filter(i => i.itemName != AXIS_COLOR_MAP[face])
+        this.InspectedValidItems = this.InspectedValidItems.filter(i => i.itemId != id)
+        this.InspectedInvalidItems = this.InspectedInvalidItems.filter(i => i.itemId != id)
 
-        if (this.notInspectedItems.filter(i => i.itemName == AXIS_COLOR_MAP[face]).length == 0)
-          this.notInspectedItems.push(this.faceItems[face])
+        if (this.notInspectedItems.filter(i => i.itemId == id).length == 0)
+          this.notInspectedItems.push(this.inspectionItems[id])
       }
     }, err => console.log(err)) 
-
-    this.bleInspectionItemService.staticItem$.subscribe(id => {
-      let isInspected
-      let result
-      switch (id) {
-        case 0:
-          isInspected = this.voltageItem.isInspected
-          result = this.voltageItem.inspectionResult
-          break;
-        case 1:
-          console.log('待定')
-          break;
-        default:
-          break;
-      }
-
-      if (isInspected) {
-        this.notInspectedItems = this.notInspectedItems.filter(i => i.itemName != '电压')
-        if (result) this.InspectedValidItems.push(this.voltageItem)
-        else this.InspectedInvalidItems.push(this.voltageItem)
-      } else {
-        this.InspectedValidItems = this.InspectedValidItems.filter(i => i.itemName != '电压')
-        this.InspectedInvalidItems = this.InspectedInvalidItems.filter(i => i.itemName != '电压')
-
-        if (this.notInspectedItems.filter(i => i.itemName == '电压').length == 0)
-          this.notInspectedItems.push(this.voltageItem)
-      }
-    }, err => console.log(err))
   }
 
   public initInspectionItem() {
-    this.faceItems = [
+    this.inspectionItems = [
       this.bleInspectionItemService.faceItem0,
       this.bleInspectionItemService.faceItem1,
       this.bleInspectionItemService.faceItem2,
       this.bleInspectionItemService.faceItem3,
       this.bleInspectionItemService.faceItem4,
-      this.bleInspectionItemService.faceItem5
+      this.bleInspectionItemService.faceItem5,
+      this.bleInspectionItemService.voltageItem,
+      this.bleInspectionItemService.cstateItem,
+      this.bleInspectionItemService.sensorsItem,
+      this.bleInspectionItemService.filterItem,
+      this.bleInspectionItemService.identityItem,
+      this.bleInspectionItemService.oadItem
     ]
-
-    this.voltageItem = this.bleInspectionItemService.voltageItem
   }
 
 }

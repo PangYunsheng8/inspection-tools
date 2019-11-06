@@ -1,0 +1,65 @@
+.oad-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    .oad-list {
+        width: 100%;
+
+        .item {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+    }
+
+    .oad-upgrade {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        align-content: center;
+        width: 90%;
+
+        .oad-title {
+            width: 100%;
+            font-weight: 700;
+            font-size: 14px;
+            margin: 5px 0 10px 0;
+        }
+
+        .fileinput-btn {
+            background-color: #409EFF;
+            position: relative;
+            color: white;
+            font-size: 12px;
+            width: 80px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: 5px;
+        
+            .input-file {
+                height: 32px;
+                position: absolute;
+                right: 0px;
+                top: 0px;
+                opacity: 0;
+            }
+        }
+
+        .fileinput-btn:hover {
+            opacity: 0.8;
+        }
+
+        .oad-option {
+            width: 40%;
+        }
+
+        .oad-progress-bar {
+            margin: 10px;
+            width: 100%;
+        }
+        
+    }
+}
+

@@ -1,13 +1,8 @@
 <el-collapse [model]="[1]" [accordion]="true" (modelChange)="selectionChange($event)">
     <div class="item-container">
-        <svg class="icon" aria-hidden="true"><use [attr.href]="sideAxisIcon"></use></svg>
+        <svg class="icon" aria-hidden="true"><use [attr.href]="axisIcon"></use></svg>
         <el-collapse-item label="检测6个侧面轴" value="1">
-            <app-side-axis-inspection (finishedEvent)="finishedEvent($event)"></app-side-axis-inspection>
-        </el-collapse-item>
-        </div>
-    <div class="item-container">
-        <svg class="icon" aria-hidden="true"><use href="#icon-dengdaiqueren"></use></svg>
-        <el-collapse-item label="待检测项目" value="2">
+            <app-axis-item-inspection (finishedEvent)="finishedEvent($event)"></app-axis-item-inspection>
         </el-collapse-item>
     </div>
 </el-collapse>
