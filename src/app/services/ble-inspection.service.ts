@@ -3,9 +3,9 @@ import { Subject } from 'rxjs';
 import { CubeState, Color } from 'src/libs/cube-state';
 import { CubeComponent } from '../components/cube/cube.component';
 import { CalibrationParam } from 'src/libs/sk-protocol-v2';
-import { AnyCubeFreemodeScene } from '../../libs/3d-cube/MagicCubeAny/FreemodeScene/AnyCubeFreemodeScene';
 
 import { BleCommandService } from './ble-command.service';
+import { CubeStateService } from './cube-state.service';
 
 interface rotateParams {
   face: number,
@@ -33,11 +33,12 @@ export class BleInspectionService {
 
   constructor(
     private bleCommandService: BleCommandService,
+    private cubeStateService: CubeStateService,
   ) { }
 
   private _dynamicInspectItem$: Subject<number> = new Subject<number>()
   private _rotateParams$: Subject<rotateParams> = new Subject<rotateParams>()
-  public cube: AnyCubeFreemodeScene;
+  private _stepInspectItem$: Subject<number> = new Subject<number>()
 
   public inspectVoltage(currentState: any, validState: any): Promise<inspectParams> {
     return new Promise<inspectParams>((resolve, reject) => {
@@ -60,7 +61,7 @@ export class BleInspectionService {
         state: ORIGIN_CUBE,
         pause: [0, 0, 0, 0, 0, 0]
       })
-      // this.cube.setCubeState(ORIGIN_CUBE)
+      this.cubeStateService.setCubeState(ORIGIN_CUBE)
       let result = true
       let description = "合格，已初始化逻辑魔方姿态"
       resolve({result, description})
@@ -104,12 +105,12 @@ export class BleInspectionService {
 
   public inspectOad(currentState: any, validState: any): Promise<inspectParams> {
     return new Promise<inspectParams>((resolve, reject) => {
-      let result
-      let description
       let currentVersion = currentState.split('.')
       let validVersion = validState.split('.')
       let [currMajor, currMinor, currPatch] = [currentVersion.slice(0,1), currentVersion.slice(1,2), currentVersion.slice(2,3)]
       let [valMajor, valMinor, valPatch] = [validVersion.slice(0,1), validVersion.slice(1,2), validVersion.slice(2,3)]
+      let result
+      let description
       if (currMajor === valMajor && currMinor === valMinor && currPatch === valPatch) {
         result = true
         description = "合格，当前版本为最新版本"
@@ -126,5 +127,8 @@ export class BleInspectionService {
   }
   public get rotateParams() {
     return this._rotateParams$
+  }
+  public get stepInspectItem() {
+    return this._stepInspectItem$
   }
 }

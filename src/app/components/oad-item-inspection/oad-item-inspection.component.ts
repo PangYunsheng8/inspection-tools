@@ -116,8 +116,6 @@ export class OadItemInspectionComponent implements OnInit {
     let fileBuff
     try {
       fileBuff = await getFileBuffer(this.otaFileInput.nativeElement.files[0])
-      console.log(fileBuff)
-      console.log(this.mtu)
     } catch (err) {
       return alert('请先选择OTA文件')
     }

@@ -13,9 +13,9 @@
             <span>顺时针:{{faceItem.ClockwiseAngle}}</span>
             <span>逆时针:{{faceItem.CounterclockwiseAngle}}</span>
             <span [class.notChecked]="!faceItem.isInspected"
-                [class.qualified]="faceItem.inspectionResult"
-                [class.failed]="!faceItem.inspectionResult">
-                {{faceItem.isInspected? faceItem.inspectionResult? "合格" : "不合格" : "未检查"}}
+                [class.qualified]="faceItem.inspectionResult===true"
+                [class.failed]="faceItem.inspectionResult===false">
+                {{faceItem.isInspected? (faceItem.inspectionResult===true? "合格" : faceItem.inspectionResult===false? "不合格" : "未检查") : "未检查"}}
             </span>
             <svg class="icon" aria-hidden="true" (click)="reInspectItem(faceItem.itemId)"><use href="#icon-caozuo-zhongxinzhihang"></use></svg>
         </div>

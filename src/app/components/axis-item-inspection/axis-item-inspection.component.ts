@@ -50,6 +50,8 @@ export class AxisItemInspectionComponent implements OnInit {
 
   public rotateParams$Subscription: Subscription
 
+  public currCollapseItem: number
+
   ngOnInit() {
     this.initInspectionItem()
 
@@ -59,15 +61,29 @@ export class AxisItemInspectionComponent implements OnInit {
       }
     })
 
-    this.bleInspectionService.dynamicInspectItem$.subscribe(async item => {
+    this.bleInspectionService.dynamicInspectItem$.subscribe(item => {
       if (item === 1) {
+        this.currCollapseItem = item
         this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
         this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
         this.rotateParams$Subscription = this.bleInspectionService.rotateParams.subscribe(rotateParams => {
           this.inspectItem(rotateParams.face, rotateParams.circle)
         }) 
       } else {
-        this.rotateParams$Subscription.unsubscribe()
+        this.currCollapseItem = null
+        if (this.rotateParams$Subscription) this.rotateParams$Subscription.unsubscribe()
+      }
+    }, err => console.log(err))
+
+    this.bleInspectionService.stepInspectItem.subscribe(step => {
+      if (this.currCollapseItem === 1 && step === 1) {
+        this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
+        this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
+        this.rotateParams$Subscription = this.bleInspectionService.rotateParams.subscribe(rotateParams => {
+          this.inspectItem(rotateParams.face, rotateParams.circle)
+        }) 
+      } else {
+        if (this.rotateParams$Subscription) this.rotateParams$Subscription.unsubscribe()
       }
     }, err => console.log(err))
   }

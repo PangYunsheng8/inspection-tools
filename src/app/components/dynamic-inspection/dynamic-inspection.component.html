@@ -1,4 +1,4 @@
-<el-collapse [model]="[1]" [accordion]="true" (modelChange)="selectionChange($event)">
+<el-collapse [model]="[0]" [accordion]="true" (modelChange)="selectionChange($event)" v-model="0">
     <div class="item-container">
         <svg class="icon" aria-hidden="true"><use [attr.href]="axisIcon"></use></svg>
         <el-collapse-item label="检测6个侧面轴" value="1">

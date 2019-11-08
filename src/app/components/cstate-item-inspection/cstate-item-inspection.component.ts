@@ -1,34 +1,20 @@
 import { Component, OnInit } from '@angular/core';
-import { CubeComponent } from '../cube/cube.component';
-import { CubeState, Color } from 'src/libs/cube-state';
 
 import { InspectionStaticItem } from '../../class/inspection-static-item';
 
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 import { BleInspectionService } from '../../services/ble-inspection.service';
-import { CubeStateFlag } from '../../../libs/3d-cube/MagicCubeAny/AnyCubeRotateState';
-
-const ORIGIN_CUBE: CubeState = [
-  [Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y],
-  [Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O],
-  [Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B],
-  [Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R],
-  [Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G],
-  [Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W]
-]
 
 @Component({
   selector: 'app-cstate-item-inspection',
   templateUrl: './cstate-item-inspection.component.html',
-  styleUrls: ['./cstate-item-inspection.component.scss'],
-  providers: [CubeComponent]
+  styleUrls: ['./cstate-item-inspection.component.scss']
 })
 export class CstateItemInspectionComponent implements OnInit {
 
   constructor(
     private bleInspectionItemService: BleInspectionItemService,
     private bleInspectionService: BleInspectionService,
-    private cube: CubeComponent
   ) { }
 
   public cstateItem: InspectionStaticItem

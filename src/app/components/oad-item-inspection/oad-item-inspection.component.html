@@ -1,4 +1,20 @@
 <div class="oad-container">
+    <mat-card class="oad-upgrade" *ngIf="oadItem.inspectionResult===false">
+        <div class="oad-title">OAD固件升级</div>
+        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip"/></div>
+
+        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="handle($event)" [disabled]="otaing">
+            <el-option label="小包(20 Bytes)" value="20"></el-option>
+            <el-option label="中包(80 Bytes)" value="80"></el-option>
+            <el-option label="中包(120 Bytes)" value="120"></el-option>
+            <el-option label="大包(230 Bytes)" value="230"></el-option>
+        </el-select>
+
+        <div class="oad-upgrade-btn"><el-button size="small" type="primary" (click)="startOTA()">开始升级</el-button></div>
+        <el-progress class="oad-progress-bar" [text-inside]="true" [stroke-width]="14" [percentage]="otaProgressValue" [status]="otaProgressMode"></el-progress>
+        <div class="oad-speed" *ngIf="otaing">{{otaSpeed | number:'0.2-2'}} kb/s</div>
+    </mat-card>
+
     <div class="oad-list">
         <mat-list>
             <mat-list-item>
@@ -22,21 +38,4 @@
             </mat-list-item>
         </mat-list>
     </div>
-
-    <!-- <mat-card class="oad-upgrade" *ngIf="oadItem.inspectionResult===false"> -->
-    <mat-card class="oad-upgrade">
-        <div class="oad-title">OAD固件升级</div>
-        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip"/></div>
-
-        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="handle($event)" [disabled]="otaing">
-            <el-option label="小包(20 Bytes)" value="20"></el-option>
-            <el-option label="中包(80 Bytes)" value="80"></el-option>
-            <el-option label="中包(120 Bytes)" value="120"></el-option>
-            <el-option label="大包(230 Bytes)" value="230"></el-option>
-        </el-select>
-
-        <div class="oad-upgrade-btn"><el-button size="small" type="primary" (click)="startOTA()">开始升级</el-button></div>
-        <el-progress class="oad-progress-bar" [text-inside]="true" [stroke-width]="14" [percentage]="otaProgressValue" [status]="otaProgressMode"></el-progress>
-        <div class="oad-speed" *ngIf="otaing">{{otaSpeed | number:'0.2-2'}} kb/s</div>
-    </mat-card>
 </div>
