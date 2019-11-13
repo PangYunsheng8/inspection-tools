@@ -291,7 +291,7 @@ export class BleBrowserService {
     }
   }
 
-  public disconnectCallback = (event) => {
+  private disconnectCallback = (event) => {
     this._command$.error(event)
     this.clearConnection()
     this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)

@@ -13,19 +13,26 @@
         }
     }
 
+    .oad-title {
+        width: 100%;
+        font-weight: 700;
+        font-size: 14px;
+        margin: 5px 0 10px 0;
+    }
+
+    .oad-download {
+        display: flex;
+        flex-wrap: wrap;
+        align-content: center;
+        width: 90%;
+    }
+
     .oad-upgrade {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-around;
+        justify-content: space-between;
         align-content: center;
         width: 90%;
-
-        .oad-title {
-            width: 100%;
-            font-weight: 700;
-            font-size: 14px;
-            margin: 5px 0 10px 0;
-        }
 
         .fileinput-btn {
             background-color: #409EFF;

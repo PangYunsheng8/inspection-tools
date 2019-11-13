@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
-
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { CstateInspectionService } from '../../services/cstate-inspection.service';
 
 @Component({
   selector: 'app-cstate-item-inspection',
@@ -14,7 +12,7 @@ export class CstateItemInspectionComponent implements OnInit {
 
   constructor(
     private bleInspectionItemService: BleInspectionItemService,
-    private bleInspectionService: BleInspectionService,
+    private cstateInspectionService: CstateInspectionService,
   ) { }
 
   public cstateItem: InspectionStaticItem
@@ -30,7 +28,7 @@ export class CstateItemInspectionComponent implements OnInit {
 
   public async inspectCstate() {
     this.cstateItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectCstate()
+    const { result, description } = await this.cstateInspectionService.inspectCstate()
     this.cstateItem.isInspected = true
     this.cstateItem.isInspecting = false
     this.cstateItem.inspectionResult = result

@@ -7,7 +7,6 @@ import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
 
 import { BleCommandService } from '../../services/ble-command.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleStateService } from '../../services/ble-state.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 
@@ -23,7 +22,6 @@ export class AxisItemInspectionComponent implements OnInit {
   constructor(
     private bleCommandService: BleCommandService,
     private bleCurrentStateService: BleCurrentStateService,
-    private bleInspectionService: BleInspectionService,
     private bleStateService: BleStateService,
     private bleInspectionItemService: BleInspectionItemService,
     private notify: ElNotificationService,
@@ -61,12 +59,12 @@ export class AxisItemInspectionComponent implements OnInit {
       }
     })
 
-    this.bleInspectionService.dynamicInspectItem$.subscribe(item => {
+    this.bleInspectionItemService.dynamicInspectItem$.subscribe(item => {
       if (item === 1) {
         this.currCollapseItem = item
         this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
         this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
-        this.rotateParams$Subscription = this.bleInspectionService.rotateParams.subscribe(rotateParams => {
+        this.rotateParams$Subscription = this.bleInspectionItemService.rotateParams$.subscribe(rotateParams => {
           this.inspectItem(rotateParams.face, rotateParams.circle)
         }) 
       } else {
@@ -75,11 +73,11 @@ export class AxisItemInspectionComponent implements OnInit {
       }
     }, err => console.log(err))
 
-    this.bleInspectionService.stepInspectItem.subscribe(step => {
+    this.bleInspectionItemService.stepInspectItem$.subscribe(step => {
       if (this.currCollapseItem === 1 && step === 1) {
         this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
         this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
-        this.rotateParams$Subscription = this.bleInspectionService.rotateParams.subscribe(rotateParams => {
+        this.rotateParams$Subscription = this.bleInspectionItemService.rotateParams$.subscribe(rotateParams => {
           this.inspectItem(rotateParams.face, rotateParams.circle)
         }) 
       } else {

@@ -3,7 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { InspectionStaticItem } from '../../class/inspection-static-item';
 
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { FilterInspectionService } from '../../services/filter-inspection.service';
 
 @Component({
   selector: 'app-filter-item-inspection',
@@ -14,7 +14,7 @@ export class FilterItemInspectionComponent implements OnInit {
 
   constructor(
     private bleInspectionItemService: BleInspectionItemService,
-    private bleInspectionService: BleInspectionService,
+    private filterInspectionService: FilterInspectionService,
   ) { }
 
   public filterItem: InspectionStaticItem
@@ -30,7 +30,7 @@ export class FilterItemInspectionComponent implements OnInit {
 
   public async inspectFilter() {
     this.filterItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectFilter()
+    const { result, description } = await this.filterInspectionService.inspectFilter()
     this.filterItem.isInspected = true
     this.filterItem.isInspecting = false
     this.filterItem.inspectionResult = result

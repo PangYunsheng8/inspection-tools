@@ -33,7 +33,6 @@ import { BleCommandService } from './services/ble-command.service';
 import { CubeRotateService } from './services/cube-rotate.service';
 import { AttitudeService } from './services/attitude.service';
 import { BleValidService } from './services/ble-valid.service'
-import { BleInspectionService } from './services/ble-inspection.service';
 import { BLE } from '@ionic-native/ble/ngx';
 import { BluetoothLE } from '@ionic-native/bluetooth-le/ngx';
 import { Device } from '@ionic-native/device/ngx';
@@ -75,7 +74,6 @@ import { Device } from '@ionic-native/device/ngx';
     BluetoothLE,
     Device,
     BleConfigService,
-    BleInspectionService,
     BleValidService,
     BleCommandService,
     CubeRotateService,

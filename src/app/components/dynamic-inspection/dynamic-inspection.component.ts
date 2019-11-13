@@ -1,6 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 import { BleStateService } from '../../services/ble-state.service';
 
 @Component({
@@ -11,7 +11,7 @@ import { BleStateService } from '../../services/ble-state.service';
 export class DynamicInspectionComponent implements OnInit {
 
   constructor(
-    private bleInspectionService: BleInspectionService,
+    private bleInspectionItemService: BleInspectionItemService,
     private bleStateService: BleStateService,
   ) { }
   
@@ -34,7 +34,7 @@ export class DynamicInspectionComponent implements OnInit {
   public selectionChange(e) {
     if (e.length) this.itemIndex = parseInt(e[0])
     else this.itemIndex = 0
-    this.bleInspectionService.dynamicInspectItem$.next(this.itemIndex)
+    this.bleInspectionItemService.dynamicInspectItem$.next(this.itemIndex)
   }
 
 }

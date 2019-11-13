@@ -1,9 +1,14 @@
 <div class="oad-container">
+    <mat-card class="oad-download" *ngIf="oadItem.inspectionResult===false">
+        <div class="oad-title">OAD固件下载</div>
+        <div><el-button size="small" type="primary" (click)="downloadOAD()">下载最新版OAD固件</el-button></div>
+    </mat-card>
     <mat-card class="oad-upgrade" *ngIf="oadItem.inspectionResult===false">
+    <!-- <mat-card class="oad-upgrade"> -->
         <div class="oad-title">OAD固件升级</div>
-        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip"/></div>
+        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip" (click)="selectFile($event)"/></div>
 
-        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="handle($event)" [disabled]="otaing">
+        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="getTransferSize()" [disabled]="otaing">
             <el-option label="小包(20 Bytes)" value="20"></el-option>
             <el-option label="中包(80 Bytes)" value="80"></el-option>
             <el-option label="中包(120 Bytes)" value="120"></el-option>
@@ -11,6 +16,7 @@
         </el-select>
 
         <div class="oad-upgrade-btn"><el-button size="small" type="primary" (click)="startOTA()">开始升级</el-button></div>
+        <div>{{selectedFile? otaFileInput.nativeElement.files[0]? otaFileInput.nativeElement.files[0].name : "未选择任何文件" : "未选择任何文件"}}</div>
         <el-progress class="oad-progress-bar" [text-inside]="true" [stroke-width]="14" [percentage]="otaProgressValue" [status]="otaProgressMode"></el-progress>
         <div class="oad-speed" *ngIf="otaing">{{otaSpeed | number:'0.2-2'}} kb/s</div>
     </mat-card>
@@ -26,7 +32,11 @@
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>
-                <div class="item"><span>最新版本:</span><span>{{oadItem.validState}}</span></div>
+                <div class="item"><span>最低可用版本:</span><span>{{oadItem.validState}}</span></div>
+            </mat-list-item>
+            <mat-divider></mat-divider>
+            <mat-list-item>
+                <div class="item"><span>最新版本:</span><span>{{latestOadVersion}}</span></div>
             </mat-list-item>
             <mat-divider></mat-divider>
             <mat-list-item>

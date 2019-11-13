@@ -75,8 +75,4 @@ export class CubeComponent implements AfterViewInit {
       this.cube.setCameraState(state)
     }
   }
-
-  public updateCameraRadius(newRadius: number) {
-    this.cube.UpdateCameraRadius(newRadius);
-  }
 }

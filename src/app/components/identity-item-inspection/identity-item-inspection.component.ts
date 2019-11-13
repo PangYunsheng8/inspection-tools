@@ -1,9 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
-
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { IdentityInspectionService } from '../../services/identity-inspection.service';
+import { BleCurrentStateService } from '../../services/ble-current-state.service';
 
 @Component({
   selector: 'app-identity-item-inspection',
@@ -14,7 +13,8 @@ export class IdentityItemInspectionComponent implements OnInit {
 
   constructor(
     private bleInspectionItemService: BleInspectionItemService,
-    private bleInspectionService: BleInspectionService,
+    private identityInspectionService: IdentityInspectionService,
+    private bleCurrentStateService: BleCurrentStateService,
   ) { }
 
   public identityItem: InspectionStaticItem
@@ -29,12 +29,14 @@ export class IdentityItemInspectionComponent implements OnInit {
   }
 
   public async inspectIdentity() {
+    let mgcId = this.bleCurrentStateService.pid
+    let currSerial = this.bleCurrentStateService.serial
     this.identityItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectIdentity()
+    const { checkResult, message } = await this.identityInspectionService.inspectIdentity(mgcId, currSerial)
     this.identityItem.isInspected = true
     this.identityItem.isInspecting = false
-    this.identityItem.inspectionResult = result
-    this.identityItem.description = description
+    this.identityItem.inspectionResult = checkResult
+    this.identityItem.description = message
 
     this.bleInspectionItemService.inspectionItem$.next(this.identityItem.itemId)
   }

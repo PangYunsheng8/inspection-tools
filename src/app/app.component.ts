@@ -12,11 +12,16 @@ export class AppComponent implements OnInit{
     private menu: MenuController,
   ) {}
 
-  ngOnInit() {
-    
+  ngOnInit() {  
   }
 
   public openDeviceDetails() {
-    this.menu.open();
+    this.menu.enable(true, 'device-details');
+    this.menu.open('device-details');
+  }
+
+  public openSettings() {
+    this.menu.enable(true, 'settings');
+    this.menu.open('settings');
   }
 }

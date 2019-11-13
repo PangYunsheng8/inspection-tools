@@ -1,11 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
-
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleValidService } from '../../services/ble-valid.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
+import { VoltageInspectionService } from '../../services/voltage-inspection.service';
 
 @Component({
   selector: 'app-voltage-item-inspection',
@@ -17,7 +15,7 @@ export class VoltageItemInspectionComponent implements OnInit {
   constructor(
     private bleCurrentStateService: BleCurrentStateService,
     private bleValidService: BleValidService,
-    private bleInspectionService: BleInspectionService,
+    private voltageInspectionService: VoltageInspectionService,
     private bleInspectionItemService: BleInspectionItemService,
   ) { }
 
@@ -31,7 +29,7 @@ export class VoltageItemInspectionComponent implements OnInit {
     this.voltageItem.currentState = this.bleCurrentStateService.voltage
     this.voltageItem.validState = this.bleValidService.VOLTAGE_VALID
     this.voltageItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectVoltage(
+    const { result, description } = this.voltageInspectionService.inspectVoltage(
       this.voltageItem.currentState, 
       this.voltageItem.validState
     )

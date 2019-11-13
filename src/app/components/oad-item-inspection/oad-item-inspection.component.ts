@@ -2,14 +2,12 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Buffer } from 'buffer';
 import { filter, map, tap, pairwise, sampleTime } from 'rxjs/operators';
 import { DfuStage } from 'src/libs/nrf-dfu';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
-
 import { BleService } from '../../services/ble.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleValidService } from '../../services/ble-valid.service';
+import { OadInspectionService, Oad } from '../../services/oad-inspection.service';
 
 @Component({
   selector: 'app-oad-item-inspection',
@@ -20,10 +18,10 @@ export class OadItemInspectionComponent implements OnInit {
 
   constructor(
     private bleService: BleService,
-    private bleInspectionService: BleInspectionService,
     private bleInspectionItemService: BleInspectionItemService,
     private bleCurrentStateService: BleCurrentStateService,
     private bleValidService: BleValidService,
+    private oadInspectionService: OadInspectionService,
   ) { }
 
   @ViewChild('uploadInput')
@@ -37,6 +35,13 @@ export class OadItemInspectionComponent implements OnInit {
   public otaSpeed: number
 
   public oadItem: InspectionStaticItem
+
+  public type: string = "1"
+  private lowestAvailableOad: Oad
+  private latestAvailableOad: Oad
+  public latestOadVersion: string
+
+  public selectedFile: boolean 
 
   ngOnInit() {
     this.initInspectionItem()
@@ -56,16 +61,24 @@ export class OadItemInspectionComponent implements OnInit {
   }
 
   public async inspectOad() {
-    let major = this.bleCurrentStateService.major
-    let minor = this.bleCurrentStateService.minor
-    let patch = this.bleCurrentStateService.patch
-    this.oadItem.currentState = major+'.'+minor+'.'+patch
-    this.oadItem.validState = this.bleValidService.VERSION_VALID
+    let { major, minor, patch } = { 
+      major: this.bleCurrentStateService.major,
+      minor: this.bleCurrentStateService.minor,
+      patch: this.bleCurrentStateService.patch,
+    }
+    this.oadItem.currentState = `${major}.${minor}.${patch}`
+    //当前OAD
+    let currOad = await this.oadInspectionService.getOadByVersion({ type: this.type, major: major, minor: minor, patch: patch})
+    //最低可用OAD
+    this.lowestAvailableOad = await this.oadInspectionService.getLowestAvailableOad(this.type) 
+    this.oadItem.validState = `${this.lowestAvailableOad.major}.${this.lowestAvailableOad.minor}.${this.lowestAvailableOad.patch}`
+
+    //最新版OAD
+    this.latestAvailableOad = await this.oadInspectionService.getLatestAvailableOad(this.type)
+    this.latestOadVersion = `${this.latestAvailableOad.major}.${this.latestAvailableOad.minor}.${this.latestAvailableOad.patch}` 
+
     this.oadItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectOad(
-      this.oadItem.currentState, 
-      this.oadItem.validState
-    )
+    const { result, description } = this.oadInspectionService.inspectOad(currOad, this.lowestAvailableOad)
     this.oadItem.isInspected = true
     this.oadItem.isInspecting = false
     this.oadItem.inspectionResult = result
@@ -86,6 +99,8 @@ export class OadItemInspectionComponent implements OnInit {
     this.bleInspectionItemService.oadItem.description = null
     this.bleInspectionItemService.oadItem.currentState = null
     this.bleInspectionItemService.oadItem.validState = null
+
+    this.latestOadVersion = null
 
     this.bleInspectionItemService.inspectionItem$.next(this.oadItem.itemId)
   }
@@ -119,20 +134,35 @@ export class OadItemInspectionComponent implements OnInit {
     } catch (err) {
       return alert('请先选择OTA文件')
     }
-    try {
-      this.otaing = true
-      await this.bleService.ota(fileBuff, +this.mtu)
-    } catch (err) {
-      alert('OTA 失败,请重试')
-      throw err
-    } finally {
-      this.otaProgressMode = 'success'
-      this.otaProgressValue = 0
-      this.otaing = false
+    let hashCodeCheckRes = this.oadInspectionService.checkHashCode(fileBuff, this.latestAvailableOad.hash_code)
+    if (!hashCodeCheckRes) return alert('文件损坏，请重新下载！')
+    const { result, description } = this.oadInspectionService.inspectOad(this.latestAvailableOad, this.lowestAvailableOad)
+    if (result) {
+      try {
+        this.otaing = true
+        await this.bleService.ota(fileBuff, +this.mtu)
+      } catch (err) {
+        alert('OTA 失败,请重试')
+        throw err
+      } finally {
+        this.otaProgressMode = 'success'
+        this.otaProgressValue = 0
+        this.otaing = false
+      }
+    } else {
+      return alert(description)
     }
   }
 
-  public handle(e) {
+  public selectFile() {
+    this.selectedFile = true
+  }
+
+  public async downloadOAD() {
+    window.open(this.latestAvailableOad.path)
+  }
+
+  public getTransferSize(e) {
     this.mtu = e
   }
 

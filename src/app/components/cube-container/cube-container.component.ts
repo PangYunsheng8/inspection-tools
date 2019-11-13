@@ -4,7 +4,7 @@ import { Quaternion } from 'three';
 
 import { AttitudeService } from '../../services/attitude.service';
 import { CubeRotateService } from '../../services/cube-rotate.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 
 @Component({
   selector: 'app-cube-container',
@@ -16,7 +16,7 @@ export class CubeContainerComponent implements OnInit {
   constructor(
     private ahrsService: AttitudeService,
     private cubeRotateService: CubeRotateService,
-    private bleInspectionService: BleInspectionService,
+    private bleInspectionItemService: BleInspectionItemService,
   ) { }
 
   @ViewChild('cube')
@@ -40,7 +40,7 @@ export class CubeContainerComponent implements OnInit {
       (window as any).rotateCounter += i.circle
       // Debug.resolve(JSON.stringify({ face: i.face, circle: i.circle, color: AXIS_COLOR_MAP[i.face], time: i.second + i.counter / 65536 }))
       this.cube.rotateFace(i.face, i.circle, 0)
-      this.bleInspectionService.rotateParams.next({face: i.face, circle: i.circle})
+      this.bleInspectionItemService.rotateParams$.next({face: i.face, circle: i.circle})
     })
   }
 

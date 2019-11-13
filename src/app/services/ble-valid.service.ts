@@ -5,5 +5,4 @@ import { Injectable } from '@angular/core';
 })
 export class BleValidService {
   public readonly VOLTAGE_VALID = 3700
-  public readonly VERSION_VALID = "2.1.11"
 }

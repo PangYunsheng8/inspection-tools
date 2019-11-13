@@ -1,9 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
-
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
+import { SensorsInspectionService } from '../../services/sensors-inspection.service';
 
 @Component({
   selector: 'app-sensors-item-inspection',
@@ -14,7 +12,7 @@ export class SensorsItemInspectionComponent implements OnInit {
 
   constructor(
     private bleInspectionItemService: BleInspectionItemService,
-    private bleInspectionService: BleInspectionService,
+    private sensorsInspectionService: SensorsInspectionService,
   ) { }
 
   public sensorsItem: InspectionStaticItem
@@ -30,7 +28,7 @@ export class SensorsItemInspectionComponent implements OnInit {
 
   public async inspectSensors() {
     this.sensorsItem.isInspecting = true
-    const { result, description } = await this.bleInspectionService.inspectSensors()
+    const { result, description } = await this.sensorsInspectionService.inspectSensors()
     this.sensorsItem.isInspected = true
     this.sensorsItem.isInspecting = false
     this.sensorsItem.inspectionResult = result

@@ -5,10 +5,8 @@ import { SensorsItemInspectionComponent } from '../../components/sensors-item-in
 import { FilterItemInspectionComponent } from '../../components/filter-item-inspection/filter-item-inspection.component';
 import { IdentityItemInspectionComponent } from '../../components/identity-item-inspection/identity-item-inspection.component';
 import { OadItemInspectionComponent } from '../../components/oad-item-inspection/oad-item-inspection.component';
-
 import { BleStateService } from '../../services/ble-state.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { BleInspectionService } from '../../services/ble-inspection.service';
 
 @Component({
   selector: 'app-static-inspection',
@@ -20,7 +18,6 @@ export class StaticInspectionComponent implements OnInit {
   constructor(
     private bleStateService: BleStateService,
     private bleInspectionItemService: BleInspectionItemService,
-    private bleInspectionService: BleInspectionService
   ) { }
 
   @ViewChild('voltageItemInspection')

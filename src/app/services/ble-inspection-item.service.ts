@@ -1,21 +1,19 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs'
-
 import { InspectionStaticItem } from '../class/inspection-static-item';
 import { InspectionDynamicItem } from '../class/inspection-dynamic-item';
 
-import { BleValidService } from './ble-valid.service';
-
-const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白',]
+interface rotateParams {
+  face: number,
+  circle: number
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class BleInspectionItemService {
 
-    constructor(
-      private bleValidService: BleValidService,
-    ) { }
+    constructor() { }
 
     //6个侧轴检查项
     public faceItem0: InspectionDynamicItem = new InspectionDynamicItem(0, '黄')
@@ -38,5 +36,23 @@ export class BleInspectionItemService {
     //OAD版本
     public oadItem: InspectionStaticItem = new InspectionStaticItem(11, 'OAD版本号')
 
-    public inspectionItem$: Subject<number> = new Subject<number>()
+    private _inspectionItem$: Subject<number> = new Subject<number>()
+
+    private _rotateParams$: Subject<rotateParams> = new Subject<rotateParams>()
+
+    private _dynamicInspectItem$: Subject<number> = new Subject<number>()
+    private _stepInspectItem$: Subject<number> = new Subject<number>()
+
+    public get inspectionItem$() {
+      return this._inspectionItem$
+    }
+    public get rotateParams$() {
+      return this._rotateParams$
+    }
+    public get dynamicInspectItem$() {
+      return this._dynamicInspectItem$
+    }
+    public get stepInspectItem$() {
+      return this._stepInspectItem$
+    }
 }
