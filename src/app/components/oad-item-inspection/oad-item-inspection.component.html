@@ -6,9 +6,9 @@
     <mat-card class="oad-upgrade" *ngIf="oadItem.inspectionResult===false">
     <!-- <mat-card class="oad-upgrade"> -->
         <div class="oad-title">OAD固件升级</div>
-        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip" (click)="selectFile($event)"/></div>
+        <div class="fileinput-btn"><span>选择文件</span><input #uploadInput class="input-file" type="file" accept=".zip" (click)="selectFile()"/></div>
 
-        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="getTransferSize()" [disabled]="otaing">
+        <el-select class="oad-select" size="small" placeholder="请选择传输包大小" (modelChange)="getTransferSize($event)" [disabled]="otaing">
             <el-option label="小包(20 Bytes)" value="20"></el-option>
             <el-option label="中包(80 Bytes)" value="80"></el-option>
             <el-option label="中包(120 Bytes)" value="120"></el-option>
@@ -16,7 +16,7 @@
         </el-select>
 
         <div class="oad-upgrade-btn"><el-button size="small" type="primary" (click)="startOTA()">开始升级</el-button></div>
-        <div>{{selectedFile? otaFileInput.nativeElement.files[0]? otaFileInput.nativeElement.files[0].name : "未选择任何文件" : "未选择任何文件"}}</div>
+        <!-- <div>{{selectedFile? otaFileInput.nativeElement.files[0]? otaFileInput.nativeElement.files[0].name : "未选择任何文件" : "未选择任何文件"}}</div> -->
         <el-progress class="oad-progress-bar" [text-inside]="true" [stroke-width]="14" [percentage]="otaProgressValue" [status]="otaProgressMode"></el-progress>
         <div class="oad-speed" *ngIf="otaing">{{otaSpeed | number:'0.2-2'}} kb/s</div>
     </mat-card>

@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders  } from '@angular/common/http';
 var hash = require('hash.js')
 
 import { ConfigService } from './config.service';
+import { FaceSide } from '../../libs/3d-cube/MagicCubeAny/FillColorScene/FaceSide';
 
 interface OadVersion {
   major: number;  //主版本号
@@ -40,19 +41,13 @@ export class OadInspectionService {
 
   public inspectOad(currOad: Oad, lowestAvailableOad: Oad) {
     let result, description
+    if (!currOad) return { result: false, description: "不存在当前版本！"}
+    if (!lowestAvailableOad) return { result: false, description: "不存在最低可用版本！"}
+
     if (this.isHigerThanLowest(currOad, lowestAvailableOad)) {
-      if (currOad.is_available === true) {
-        result = true
-        description = "当前OAD版本合法且可用！"
-        return { result, description }
-      } else {
-        description = "当前版本不可用！"
-      }
-    } else {
-      description = "当前版本过低！"
-    }
-    result = false
-    return { result, description }
+      if (currOad.is_available === true) return { result: true, description: "当前OAD版本合法且可用！"}
+      else return { result: false, description: "当前版本不可用！" }
+    } else return { result: false, description: "当前版本过低！" }
   }
 
   //获得当前版本的OAD固件信息
@@ -75,17 +70,17 @@ export class OadInspectionService {
 
   //检查当前版本是否高于最低可用版本
   public isHigerThanLowest(currOad: Oad, lowestAvailableOad: Oad): boolean {
-    if (currOad.major >= lowestAvailableOad.major) {
-      if (currOad.minor >= lowestAvailableOad.minor) {
-        if (currOad.patch >= lowestAvailableOad.patch) return true
-        else return false
-      } else return false
-    }
-    else return false
+    if (currOad.major >= lowestAvailableOad.major && 
+      currOad.minor >= lowestAvailableOad.minor && 
+      currOad.patch >= lowestAvailableOad.patch) {
+        return true
+      }
+    return false
   }
 
   //检查OAD固件的哈希编码与数据库是否一致
   public checkHashCode(fileBuff: ArrayBuffer, hashCode: string): boolean {
+    console.log('compute hash')
     var currhashCode = hash.sha256().update(fileBuff).digest('hex')
     if (currhashCode == hashCode) return true
     else return false

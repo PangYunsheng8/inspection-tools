@@ -85,9 +85,6 @@ export class DfuTransportAnyBle extends DfuTransportPrn {
     async writeData(bytes: Uint8Array) {
         // Cast the Uint8Array info a Buffer so it works on nodejs v6
         const bytesBuf = Buffer.from(bytes as Buffer);
-        console.log(bytesBuf)
-        console.log(bytesBuf)
-        console.log(bytesBuf)
         debug(' data --> ', bytesBuf);
 
         await this.writeDataImpl(bytesBuf)

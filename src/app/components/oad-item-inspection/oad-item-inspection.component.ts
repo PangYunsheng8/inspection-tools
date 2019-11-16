@@ -37,8 +37,10 @@ export class OadItemInspectionComponent implements OnInit {
   public oadItem: InspectionStaticItem
 
   public type: string = "1"
-  private lowestAvailableOad: Oad
-  private latestAvailableOad: Oad
+
+  public lowestAvlOad: Oad
+  public latestAvlOad: Oad
+
   public latestOadVersion: string
 
   public selectedFile: boolean 
@@ -61,24 +63,27 @@ export class OadItemInspectionComponent implements OnInit {
   }
 
   public async inspectOad() {
+    this.oadItem.isInspecting = true
     let { major, minor, patch } = { 
       major: this.bleCurrentStateService.major,
       minor: this.bleCurrentStateService.minor,
       patch: this.bleCurrentStateService.patch,
     }
-    this.oadItem.currentState = `${major}.${minor}.${patch}`
-    //当前OAD
-    let currOad = await this.oadInspectionService.getOadByVersion({ type: this.type, major: major, minor: minor, patch: patch})
-    //最低可用OAD
-    this.lowestAvailableOad = await this.oadInspectionService.getLowestAvailableOad(this.type) 
-    this.oadItem.validState = `${this.lowestAvailableOad.major}.${this.lowestAvailableOad.minor}.${this.lowestAvailableOad.patch}`
+     
+    let currOad = await this.oadInspectionService.getOadByVersion({ type: this.type, major: major, minor: minor, patch: patch })
+    this.lowestAvlOad = await this.oadInspectionService.getLowestAvailableOad(this.type) 
+    this.latestAvlOad = await this.oadInspectionService.getLatestAvailableOad(this.type)
 
-    //最新版OAD
-    this.latestAvailableOad = await this.oadInspectionService.getLatestAvailableOad(this.type)
-    this.latestOadVersion = `${this.latestAvailableOad.major}.${this.latestAvailableOad.minor}.${this.latestAvailableOad.patch}` 
+    if (currOad) this.oadItem.currentState = `${major}.${minor}.${patch}`
+    else this.oadItem.currentState = "当前版本不存在!"
 
-    this.oadItem.isInspecting = true
-    const { result, description } = this.oadInspectionService.inspectOad(currOad, this.lowestAvailableOad)
+    if (this.lowestAvlOad) this.oadItem.validState = `${this.lowestAvlOad.major}.${this.lowestAvlOad.minor}.${this.lowestAvlOad.patch}`
+    else this.oadItem.validState = "最低可用版本不存在！"
+
+    if (this.latestAvlOad) this.latestOadVersion = `${this.latestAvlOad.major}.${this.latestAvlOad.minor}.${this.latestAvlOad.patch}`
+    else this.latestOadVersion = "无最新可用版本！"
+
+    const { result, description} = this.oadInspectionService.inspectOad(currOad, this.lowestAvlOad)
     this.oadItem.isInspected = true
     this.oadItem.isInspecting = false
     this.oadItem.inspectionResult = result
@@ -128,15 +133,23 @@ export class OadItemInspectionComponent implements OnInit {
         reader.readAsArrayBuffer(file)
       })
     }
+    let file = this.otaFileInput.nativeElement.files[0]
+    if (file.size > 100000) {  //文件不超过100k
+      return alert('文件太大，请重新选择！')
+    }
     let fileBuff
     try {
-      fileBuff = await getFileBuffer(this.otaFileInput.nativeElement.files[0])
+      fileBuff = await getFileBuffer(file)
     } catch (err) {
       return alert('请先选择OTA文件')
     }
-    let hashCodeCheckRes = this.oadInspectionService.checkHashCode(fileBuff, this.latestAvailableOad.hash_code)
-    if (!hashCodeCheckRes) return alert('文件损坏，请重新下载！')
-    const { result, description } = this.oadInspectionService.inspectOad(this.latestAvailableOad, this.lowestAvailableOad)
+    try {
+      let hashCodeCheckRes = this.oadInspectionService.checkHashCode(fileBuff, this.latestAvlOad.hash_code)
+      if (!hashCodeCheckRes) return alert('文件损坏，请重新下载！')
+    } catch (err) {
+      return alert('检测到该文件不可用或不是最新可用版本，无法更新！')
+    }
+    const { result, description } = this.oadInspectionService.inspectOad(this.latestAvlOad, this.lowestAvlOad)
     if (result) {
       try {
         this.otaing = true
@@ -158,8 +171,12 @@ export class OadItemInspectionComponent implements OnInit {
     this.selectedFile = true
   }
 
-  public async downloadOAD() {
-    window.open(this.latestAvailableOad.path)
+  public downloadOAD() {
+    try{
+      window.open(this.latestAvlOad.path)
+    } catch(err) {
+      return alert('无法下载，无最新可用版本！')
+    }
   }
 
   public getTransferSize(e) {

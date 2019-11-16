@@ -2,9 +2,7 @@ import { Component, OnInit, Output, EventEmitter} from '@angular/core';
 import { ElNotificationService } from 'element-angular';
 import { ElMessageService } from 'element-angular';
 import { Subscription } from 'rxjs';
-
 import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
-
 import { BleCommandService } from '../../services/ble-command.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleStateService } from '../../services/ble-state.service';

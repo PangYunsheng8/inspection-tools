@@ -1,8 +1,6 @@
 import { Component, OnInit } from '@angular/core';
-
 import { InspectionStaticItem } from '../../class/inspection-static-item';
 import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
-
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
 import { BleStateService } from '../../services/ble-state.service';
 
