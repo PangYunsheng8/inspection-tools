@@ -1,10 +1,4 @@
 <div class="connection-main">
-    <!-- <div class="device-prefix">
-        <mat-form-field>
-            <input matInput placeholder="BLE设备Name前缀" [(ngModel)]="namePrefix">
-        </mat-form-field>
-    </div> -->
-
     <div *ngIf="!bleStateService.connected">
         <a href="#" (click)="scanAndConnect()">
             <svg class="icon" aria-hidden="true"><use href="#icon-BOMbaojia"></use></svg>

@@ -9,7 +9,6 @@ import { getUpdatesFromZipFileBytes, DfuTransportAnyBle, DfuOperation, DfuProgre
 import { BleStateService } from './ble-state.service';
 import { BleConfigService } from './ble-config.service';
 
-
 type BluetoothServiceUUID = number | string;
 type BluetoothCharacteristicUUID = number | string;
 type BluetoothDescriptorUUID = number | string;

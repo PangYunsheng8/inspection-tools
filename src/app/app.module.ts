@@ -1,10 +1,11 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MaterialModule } from './material.module';
 import { ElModule } from 'element-angular';
-import { IonicModule } from '@ionic/angular';  
+import { IonicModule } from '@ionic/angular';
+import { GraphQLModule } from './graphql.module';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -23,6 +24,7 @@ import { SensorsItemInspectionComponent } from './components/sensors-item-inspec
 import { IdentityItemInspectionComponent } from './components/identity-item-inspection/identity-item-inspection.component';
 import { FilterItemInspectionComponent } from './components/filter-item-inspection/filter-item-inspection.component';  
 import { OadItemInspectionComponent } from './components/oad-item-inspection/oad-item-inspection.component';
+import { AttitudeItemInspectionComponent } from './components/attitude-item-inspection/attitude-item-inspection.component';
 
 import { BleService } from './services/ble.service';
 import { BleStateService } from './services/ble-state.service';
@@ -54,7 +56,8 @@ import { Device } from '@ionic-native/device/ngx';
     VoltageItemInspectionComponent,
     SensorsItemInspectionComponent,
     IdentityItemInspectionComponent,
-    FilterItemInspectionComponent
+    FilterItemInspectionComponent,
+    AttitudeItemInspectionComponent
   ],
   imports: [
     BrowserModule,
@@ -63,7 +66,8 @@ import { Device } from '@ionic-native/device/ngx';
     MaterialModule,
     FormsModule,
     ElModule.forRoot(),
-    IonicModule.forRoot()
+    IonicModule.forRoot(),
+    GraphQLModule
   ],
   providers: [
     BleService,

@@ -54,6 +54,20 @@ export class BleCommandService {
       this.bleService.send(buffer)
     })
   }
+  public async setWorkState(workState: WorkState): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const skProtocolV2 = SkProtocolV2.getInstance()
+      const { buffer, currId } = skProtocolV2.encodeCommand(Command.WORK_STATE, true, { workState })
+      const subscription = this.bleService.command$.pipe(
+        map(i => skProtocolV2.resolveCommandHeader(i)),
+        filter(i => i.command === Command.WORK_STATE && i.id === currId)
+      ).subscribe(i => {
+        resolve()
+        subscription.unsubscribe()
+      })
+      this.bleService.send(buffer)
+    })
+  }
   public async getTime(): Promise<Time> {
     return new Promise<Time>((resolve, reject) => {
       const skProtocolV2 = SkProtocolV2.getInstance()
@@ -138,15 +152,46 @@ export class BleCommandService {
       this.bleService.send(buffer)
     })
   }
+  public async setSleepState(sleepState: SleepState): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      const skProtocolV2 = SkProtocolV2.getInstance()
+      const { buffer, currId } = skProtocolV2.encodeCommand(Command.SLEEP_STATE, true, { sleepState })
+      const subscription = this.bleService.command$.pipe(
+        map(i => skProtocolV2.resolveCommandHeader(i)),
+        filter(i => i.command === Command.SLEEP_STATE && i.id === currId)
+      ).subscribe(i => {
+        resolve()
+        subscription.unsubscribe()
+      })
+      this.bleService.send(buffer)
+    })
+  }
   public async getCoderFilterParam(): Promise<CoderFilterParam> {
     return new Promise<CoderFilterParam>((resolve, reject) => {
       const skProtocolV2 = SkProtocolV2.getInstance()
       const { buffer, currId } = skProtocolV2.encodeCommand(Command.CODER_FILTER_PARAM, false)
       const subscription = this.bleService.command$.pipe(
         map(i => skProtocolV2.resolveCommand(i)),
-        filter(i => i.header.command === Command.CODER_FILTER_PARAM && i.header.id === currId)
+        // filter(i => i.header.command === Command.CODER_FILTER_PARAM && i.header.id === currId)
       ).subscribe(i => {
         resolve(i as CoderFilterParam)
+        subscription.unsubscribe()
+      })
+      this.bleService.send(buffer)
+    })
+  }
+  public async getCubeState(): Promise<HardwareCubeState> {
+    return new Promise<HardwareCubeState>((resolve, reject) => {
+      console.log(Command.CUBE_STATE)
+      const skProtocolV2 = SkProtocolV2.getInstance()
+      const { buffer, currId } = skProtocolV2.encodeCommand(Command.CUBE_STATE, false)
+      console.log(buffer, currId)
+      const subscription = this.bleService.command$.pipe(
+        map(i => skProtocolV2.resolveCommand(i)),
+        filter(i => i.header.command === Command.CUBE_STATE && i.header.id === currId)
+      ).subscribe(i => {
+        console.log(i)
+        resolve(i as HardwareCubeState)
         subscription.unsubscribe()
       })
       this.bleService.send(buffer)

@@ -1,32 +1,25 @@
 <div class="result-main">
-
-  <ion-card style="background: #a2a4ab">
-    <ion-item>
-      <span class="valid" style="color: black">未检测</span>
-    </ion-item>
-
-    <ion-card-content>
-      <ion-label class="item" *ngFor="let notInspectedItem of notInspectedItems">{{notInspectedItem.itemName}}</ion-label>
-    </ion-card-content>
+  <ion-card class="container">
+    <div class="title"><h3>请检查逻辑魔方与实际魔方状态是否一致</h3></div>
+    <div class="content">
+      <el-button class="btn" size="small" type="primary" (click)="doConsistent()" [elDisabled]="isInspected">一致</el-button>
+      <el-button class="btn" size="small" type="primary" (click)="doInConsistent()" [elDisabled]="isInspected">不一致</el-button>
+      <el-button class="btn" size="small" type="primary" (click)="doReChoose()">重新选择</el-button>
+    </div>
   </ion-card>
 
-  <ion-card style="background: #28e070">
-    <ion-item>
-      <span class="valid" style="color: black">已检测(合格)</span>
-    </ion-item>
-
-    <ion-card-content>
-      <ion-label class="item" *ngFor="let InspectedValidItem of InspectedValidItems">{{InspectedValidItem.itemName}}</ion-label>
-    </ion-card-content>
+  <ion-card class="container">
+    <div class="title"><h3>检查结果</h3></div>
+    <el-alert *ngIf="inspRes===true" type="success" [show-icon]="true">检查合格，请还原手中的魔方!</el-alert>
+    <el-alert *ngIf="inspRes===false" type="error" [show-icon]="true">检查不合格!</el-alert>
   </ion-card>
 
-  <ion-card style="background: #F56C6C">
-    <ion-item>
-      <span class="invalid" style="color: black">已检测(不合格)</span>
-    </ion-item>
-
-    <ion-card-content>
-      <ion-label class="item" *ngFor="let InspectedInvalidItem of InspectedInvalidItems">{{InspectedInvalidItem.itemName}}</ion-label>
-    </ion-card-content>
+  <ion-card *ngIf="inspRes" class="container">
+    <div class="title"><h3>还原魔方并断开连接</h3></div>
+    <div class="content">
+      <el-button class="btn" size="small" type="primary" (click)="checkCubeState()" [elDisabled]="recover">已还原</el-button>
+      <div *ngIf="recover" class="disconnect">{{seconds}}s后断开连接！</div>
+    </div>
   </ion-card>
+
 </div>

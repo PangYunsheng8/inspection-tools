@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { Debug } from 'src/libs/debug';
 import { bufferToHex } from 'src/libs/utils';
 import { WorkState } from 'src/libs/sk-protocol-v2';
-
 import { BleService } from '../../services/ble.service';
 import { BleStateService } from '../../services/ble-state.service';
 import { AttitudeService } from '../../services/attitude.service';
@@ -26,10 +25,11 @@ export class ConnectionComponent implements OnInit {
     private cubeRotateService: CubeRotateService,
   ) {}
 
+  //是否正在连接
   public connecting = false
-  // public connected = false
+  //设备前缀
   public namePrefix = 'MHC'
-
+  //是否debug
   public enableDebug = true
 
   ngOnInit() {
@@ -47,7 +47,6 @@ export class ConnectionComponent implements OnInit {
     try {
       this.connecting = true
       await this.bleService.connect(device.id, this.enableDebug)
-      // this.connected = true
     } catch (err) {
       alert(`连接失败！请重试！原因:${err}`)
       return
@@ -60,8 +59,12 @@ export class ConnectionComponent implements OnInit {
       Debug.info(`蓝牙设备断开连接!`)
     })
     await this.oneKeyGetAll()
-    this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
+
+    //将休眠状态设置为0
+    await this.bleCommandService.setSleepState(0)
     this.connectDataByWorkState(this.bleCurrentStateService.workState)
+
+    this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
   }
 
   public async disconnect() {
@@ -70,15 +73,6 @@ export class ConnectionComponent implements OnInit {
     }
     this.ahrsService.disconnectAll()
     this.clearCurrentState()
-    // this.connected = false
-    this.bleStateService.connectionStatus$.next(this.bleStateService.connectedDevice? true: false)
-  }
-
-  public clearCurrentState() {
-    this.clearHardwareCurrentState()
-    this.clearBatteryCurrentState()
-    this.clearCoderFilterParamCurrentState()
-    this.clearWorkStateCurrentState()
   }
 
   private connectDataByWorkState(workState: WorkState) {
@@ -105,13 +99,24 @@ export class ConnectionComponent implements OnInit {
     }
   }
 
+  //获取所有设备信息
   public async oneKeyGetAll() {
     await this.getHardwareInfo()
     await this.getBatteryInfo()
     await this.getCoderFilterParam()
     await this.getWorkState()
+    await this.getSensorsCalibrationParam()
+  }
+  //清除所有设备信息
+  public clearCurrentState() {
+    this.clearHardwareInfo()
+    this.clearBatteryInfo()
+    this.clearCoderFilterParam()
+    this.clearWorkState()
+    this.clearSensorsCalibrationParam()
   }
 
+  //获取当前hardwareInfo
   public async getHardwareInfo() {
     const { pid, serial, major, minor, patch, bootCount } = await this.bleCommandService.getHardwareInfo()
     this.bleCurrentStateService.pid = bufferToHex(pid)
@@ -121,8 +126,8 @@ export class ConnectionComponent implements OnInit {
     this.bleCurrentStateService.patch = patch
     this.bleCurrentStateService.bootCount = bootCount
   }
-
-  public clearHardwareCurrentState() {
+  //清除当前hardwareInfo
+  public clearHardwareInfo() {
     this.bleCurrentStateService.pid = null
     this.bleCurrentStateService.serial = null
     this.bleCurrentStateService.major = null
@@ -131,34 +136,58 @@ export class ConnectionComponent implements OnInit {
     this.bleCurrentStateService.bootCount = null
   }
 
+  //获取当前voltage和percentage
   public async getBatteryInfo() {
     const { voltage, percentage } = await this.bleCommandService.getBatteryInfo()
     this.bleCurrentStateService.voltage = voltage
     this.bleCurrentStateService.percentage = percentage
   }
-
-  public clearBatteryCurrentState() {
+  //清除当前voltage和percentage
+  public clearBatteryInfo() {
     this.bleCurrentStateService.voltage = null
     this.bleCurrentStateService.percentage = null
   }
 
+  //获取当前coderErrorCount和axisInterfereCount
   public async getCoderFilterParam() {
     const { coderErrorCount, axisInterfereCount } = await this.bleCommandService.getCoderFilterParam()
     this.bleCurrentStateService.coderErrorCount = coderErrorCount
     this.bleCurrentStateService.axisInterfereCount = axisInterfereCount
   }
-
-  public clearCoderFilterParamCurrentState() {
+  //清除当前coderErrorCount和axisInterfereCount
+  public clearCoderFilterParam() {
     this.bleCurrentStateService.coderErrorCount = null
     this.bleCurrentStateService.axisInterfereCount = null
   }
 
+  //获取当前workState
   public async getWorkState() {
     this.bleCurrentStateService.workState = await this.bleCommandService.getWorkState()
   }
-
-  public clearWorkStateCurrentState() {
+  //设置当前的工作状态为正常的工作状态
+  public async setWorkState() {
+    await this
+  }
+  //清除当前workState
+  public clearWorkState() {
     this.bleCurrentStateService.workState = null
   }
 
+  //获取当前九轴校准参数
+  public async getSensorsCalibrationParam() {
+    const {
+      accelerometerParam,
+      gyroscopeParam,
+      magnetometerParam
+    } = await this.bleCommandService.getSensorsCalibrationParam()
+    this.bleCurrentStateService.accelerometerParam = accelerometerParam
+    this.bleCurrentStateService.gyroscopeParam = gyroscopeParam
+    this.bleCurrentStateService.magnetometerParam = magnetometerParam
+  }
+  //清除当前九轴校准参数
+  public clearSensorsCalibrationParam() {
+    this.bleCurrentStateService.accelerometerParam = null
+    this.bleCurrentStateService.gyroscopeParam = null
+    this.bleCurrentStateService.magnetometerParam = null
+  }
 }

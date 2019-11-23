@@ -3,9 +3,16 @@ import { Subject } from 'rxjs'
 import { InspectionStaticItem } from '../class/inspection-static-item';
 import { InspectionDynamicItem } from '../class/inspection-dynamic-item';
 
-interface rotateParams {
-  face: number,
-  circle: number
+export enum InspRes {
+  valid,
+  invalid,
+  notInspected
+}
+
+export enum InspItemIcon {
+  "#icon-chenggong",
+  '#icon-shibai',
+  "#icon-dengdaiqueren"
 }
 
 @Injectable({
@@ -30,29 +37,24 @@ export class BleInspectionItemService {
     //九轴参数校准
     public sensorsItem: InspectionStaticItem = new InspectionStaticItem(8, '九轴参数校准')
     //初始化滤波参数
-    public filterItem: InspectionStaticItem = new InspectionStaticItem(9, '初始化滤波参数')
+    public filterItem: InspectionStaticItem = new InspectionStaticItem(9, '初始化滤波算法')
     //ID与序列号合法性
     public identityItem: InspectionStaticItem = new InspectionStaticItem(10, 'ID与序列号合法性')
     //OAD版本
     public oadItem: InspectionStaticItem = new InspectionStaticItem(11, 'OAD版本号')
 
-    private _inspectionItem$: Subject<number> = new Subject<number>()
+    //姿态检测
+    public attitudeItem: InspectionDynamicItem = new InspectionDynamicItem(12, '魔方姿态检测')
 
-    private _rotateParams$: Subject<rotateParams> = new Subject<rotateParams>()
-
-    private _dynamicInspectItem$: Subject<number> = new Subject<number>()
+    //stepper Subject，静态检查执行完后next相应的ID，提示打开动态检查；动态检查完后同样next相应的ID，提示打开检查结果
     private _stepInspectItem$: Subject<number> = new Subject<number>()
+    //动态检查中的折叠面板Subject，每当一个折叠面板打开，next相应的面板ID
+    private _dynInspStep$: Subject<number> = new Subject<number>()
 
-    public get inspectionItem$() {
-      return this._inspectionItem$
-    }
-    public get rotateParams$() {
-      return this._rotateParams$
-    }
-    public get dynamicInspectItem$() {
-      return this._dynamicInspectItem$
-    }
     public get stepInspectItem$() {
       return this._stepInspectItem$
+    }
+    public get dynInspStep$() {
+      return this._dynInspStep$
     }
 }

@@ -1,5 +1,17 @@
 .result-main {
-    .item {
-        color: white;
+  .container {  
+    .title {
+      margin: 5px 10px;
     }
+    .content {
+      margin: 5px 10px;
+      .btn {
+        margin: 5px 10px;
+      }
+    }
+    .disconnect {
+      font-weight: 700;
+      font-size: 18px;
+    }
+  }
 }

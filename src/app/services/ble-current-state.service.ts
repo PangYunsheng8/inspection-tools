@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-
+import { CalibrationParam } from 'src/libs/sk-protocol-v2';
+ 
 @Injectable({
   providedIn: 'root'
 })
@@ -23,4 +24,9 @@ export class BleCurrentStateService {
 
     //工作状态
     public workState: number
+
+    //九轴校准参数
+    public accelerometerParam: CalibrationParam
+    public gyroscopeParam: CalibrationParam
+    public magnetometerParam: CalibrationParam
 }

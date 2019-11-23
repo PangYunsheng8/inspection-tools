@@ -6,7 +6,8 @@ import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
 import { BleCommandService } from '../../services/ble-command.service';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleStateService } from '../../services/ble-state.service';
-import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
+import { BleInspectionItemService, InspRes } from '../../services/ble-inspection-item.service';
+import { CubeRotateService } from '../../services/cube-rotate.service';
 
 const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白']
 
@@ -24,6 +25,7 @@ export class AxisItemInspectionComponent implements OnInit {
     private bleInspectionItemService: BleInspectionItemService,
     private notify: ElNotificationService,
     private message: ElMessageService,
+    private cubeRotateService: CubeRotateService
   ) { }
 
   @Output() finishedEvent = new EventEmitter<string>();
@@ -41,50 +43,62 @@ export class AxisItemInspectionComponent implements OnInit {
 
   //已检查的项目个数
   public hasInspectedItems: number = 0
-  //最终检查结果
+  //6个面的最终检查结果
   public finalResult: boolean
-
+  //魔方旋转参数订阅
   public rotateParams$Subscription: Subscription
 
-  public currCollapseItem: number
-
   ngOnInit() {
-    this.initInspectionItem()
+    this.initInspectionItem()  //初始化6个侧面轴检查项
 
     this.bleStateService.connectionStatus$.subscribe(connected => {
-      if (!connected) {
+      if (!connected) {  //若断开连接，清空检查项的内容
         this.clearInspectionItem()
       }
     })
 
-    this.bleInspectionItemService.dynamicInspectItem$.subscribe(item => {
-      if (item === 1) {
-        this.currCollapseItem = item
+    this.bleInspectionItemService.dynInspStep$.subscribe(dynStep => {
+      if (dynStep === 1) {  //如果执行到当前检查项，则开始检查6个侧面轴
         this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
         this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
-        this.rotateParams$Subscription = this.bleInspectionItemService.rotateParams$.subscribe(rotateParams => {
-          this.inspectItem(rotateParams.face, rotateParams.circle)
+        this.rotateParams$Subscription = this.cubeRotateService.rotate$.subscribe(rotateParams => {
+          this.inspect(rotateParams.face, rotateParams.circle)
         }) 
-      } else {
-        this.currCollapseItem = null
+      } else {  //如果未执行到当前检查项，则取消当前的订阅
         if (this.rotateParams$Subscription) this.rotateParams$Subscription.unsubscribe()
       }
-    }, err => console.log(err))
-
-    this.bleInspectionItemService.stepInspectItem$.subscribe(step => {
-      if (this.currCollapseItem === 1 && step === 1) {
-        this.coderErrorCount = this.bleCurrentStateService.coderErrorCount
-        this.axisInterfereCount = this.bleCurrentStateService.axisInterfereCount
-        this.rotateParams$Subscription = this.bleInspectionItemService.rotateParams$.subscribe(rotateParams => {
-          this.inspectItem(rotateParams.face, rotateParams.circle)
-        }) 
-      } else {
-        if (this.rotateParams$Subscription) this.rotateParams$Subscription.unsubscribe()
-      }
-    }, err => console.log(err))
+    })
   }
 
-  public async inspectItem(currRotateFace: number, currRotateCircle: number) {
+  //初始化待检测项目信息
+  public initInspectionItem() {
+    this.faceItems = [
+      this.bleInspectionItemService.faceItem0,
+      this.bleInspectionItemService.faceItem1,
+      this.bleInspectionItemService.faceItem2,
+      this.bleInspectionItemService.faceItem3,
+      this.bleInspectionItemService.faceItem4,
+      this.bleInspectionItemService.faceItem5
+    ]
+  }
+
+  //清除当前检查项目的信息
+  public clearInspectionItem() {
+    for (let i = 0; i < 6; i++) {
+      this.faceItems[i].isInspected = false
+      this.faceItems[i].inspectionResult = null
+      this.faceItems[i].description = null
+      this.faceItems[i].ClockwiseAngle = 0
+      this.faceItems[i].CounterclockwiseAngle = 0
+    }
+
+    this.lastRotateFace = 0
+    this.lastRotateDirection = 1
+    this.hasInspectedItems = 0
+    this.finishedEvent.emit(InspRes[2])
+  }
+
+  public async inspect(currRotateFace: number, currRotateCircle: number) {
     this.faceItems[currRotateFace].isInspecting = true
 
     //判断当前旋转轴是否与上次旋转轴相同
@@ -126,9 +140,8 @@ export class AxisItemInspectionComponent implements OnInit {
 
       //判断该轴是否合格, 如果转动过程中coderErrorCount改变，直接判定为不合格，如果axisInterfereCount改变，提示用户重新检查
       const { coderErrorCount, axisInterfereCount } = await this.bleCommandService.getCoderFilterParam()
-      this.inspectIsValid(currRotateFace, coderErrorCount, axisInterfereCount)
+      this.inspectAxis(currRotateFace, coderErrorCount, axisInterfereCount)
 
-      this.bleInspectionItemService.inspectionItem$.next(currRotateFace)
       this.hasInspectedItems += 1
       if (this.hasInspectedItems === this.faceItems.length) {
         this.finalResult = true
@@ -136,7 +149,7 @@ export class AxisItemInspectionComponent implements OnInit {
           let resut = i.inspectionResult
           if (!resut) this.finalResult = false
         })
-        this.finishedEvent.emit(this.finalResult? "valid": "invalid")
+        this.finishedEvent.emit(this.finalResult? InspRes[0]: InspRes[1])
       }
     }
 
@@ -144,7 +157,7 @@ export class AxisItemInspectionComponent implements OnInit {
     this.lastRotateDirection = currRotateDirection
   }
 
-  public inspectIsValid(currRotateFace, coderErrorCount, axisInterfereCount) {
+  public inspectAxis(currRotateFace, coderErrorCount, axisInterfereCount) {
     if (coderErrorCount != this.coderErrorCount) {
       this.faceItems[currRotateFace].inspectionResult = false
       this.faceItems[currRotateFace].description = `${AXIS_COLOR_MAP[currRotateFace]}色面不合格`
@@ -160,35 +173,6 @@ export class AxisItemInspectionComponent implements OnInit {
     }
     this.coderErrorCount = coderErrorCount
     this.axisInterfereCount = axisInterfereCount
-  }
-
-  //初始化待检测项目信息
-  public initInspectionItem() {
-    this.faceItems = [
-      this.bleInspectionItemService.faceItem0,
-      this.bleInspectionItemService.faceItem1,
-      this.bleInspectionItemService.faceItem2,
-      this.bleInspectionItemService.faceItem3,
-      this.bleInspectionItemService.faceItem4,
-      this.bleInspectionItemService.faceItem5
-    ]
-  }
-
-  //清除当前检查项目的信息
-  public clearInspectionItem() {
-    for (let i = 0; i < 6; i++) {
-      this.faceItems[i].isInspected = false
-      this.faceItems[i].inspectionResult = null
-      this.faceItems[i].description = null
-      this.faceItems[i].ClockwiseAngle = 0
-      this.faceItems[i].CounterclockwiseAngle = 0
-      this.bleInspectionItemService.inspectionItem$.next(i)
-    }
-
-    this.lastRotateFace = 0
-    this.lastRotateDirection = 1
-    this.hasInspectedItems = 0
-    this.finishedEvent.emit("")
   }
 
   //重新检查所有轴
@@ -211,10 +195,9 @@ export class AxisItemInspectionComponent implements OnInit {
         this.faceItems[face].description = null
         this.faceItems[face].ClockwiseAngle = 0
         this.faceItems[face].CounterclockwiseAngle = 0
-        this.bleInspectionItemService.inspectionItem$.next(face)
 
         this.hasInspectedItems -= 1
-        this.finishedEvent.emit("")
+        this.finishedEvent.emit(InspRes[2])
       }
     }
   }

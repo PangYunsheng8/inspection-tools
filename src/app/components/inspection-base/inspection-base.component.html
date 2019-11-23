@@ -1,12 +1,14 @@
-<mat-vertical-stepper #stepper (selectionChange)="selectionChange($event)">
-    <mat-step>
+<mat-vertical-stepper linear="true" #stepper (selectionChange)="selectionChange($event)">
+    <mat-step [completed]="firstStepComp" editable="false">
+    <!-- <mat-step> -->
         <ng-template matStepLabel>静态检查</ng-template>
-        <app-static-inspection></app-static-inspection>
+        <app-static-inspection (staInspFinish)="doStaInspFinish($event)"></app-static-inspection>
     </mat-step>
 
-    <mat-step>
+    <mat-step [completed]="secondStepComp" editable="false">
+    <!-- <mat-step> -->
         <ng-template matStepLabel>动态检查</ng-template>
-        <app-dynamic-inspection></app-dynamic-inspection>
+        <app-dynamic-inspection (dynInspFinish)="doDynInspFinish($event)"></app-dynamic-inspection>
     </mat-step>
 
     <mat-step>

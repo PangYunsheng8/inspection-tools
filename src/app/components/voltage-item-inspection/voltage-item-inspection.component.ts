@@ -3,7 +3,6 @@ import { InspectionStaticItem } from '../../class/inspection-static-item';
 import { BleCurrentStateService } from '../../services/ble-current-state.service';
 import { BleValidService } from '../../services/ble-valid.service';
 import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
-import { VoltageInspectionService } from '../../services/voltage-inspection.service';
 
 @Component({
   selector: 'app-voltage-item-inspection',
@@ -15,21 +14,21 @@ export class VoltageItemInspectionComponent implements OnInit {
   constructor(
     private bleCurrentStateService: BleCurrentStateService,
     private bleValidService: BleValidService,
-    private voltageInspectionService: VoltageInspectionService,
     private bleInspectionItemService: BleInspectionItemService,
   ) { }
 
+  //电压检查项
   public voltageItem: InspectionStaticItem
 
   ngOnInit() {
     this.initInspectionItem()
   }
 
-  public async inspectVoltage() {
+  public async inspect() {
+    this.voltageItem.isInspecting = true
     this.voltageItem.currentState = this.bleCurrentStateService.voltage
     this.voltageItem.validState = this.bleValidService.VOLTAGE_VALID
-    this.voltageItem.isInspecting = true
-    const { result, description } = this.voltageInspectionService.inspectVoltage(
+    const { result, description } = this.inspectVoltage(
       this.voltageItem.currentState, 
       this.voltageItem.validState
     )
@@ -37,8 +36,20 @@ export class VoltageItemInspectionComponent implements OnInit {
     this.voltageItem.isInspecting = false
     this.voltageItem.inspectionResult = result
     this.voltageItem.description = description
+  }
 
-    this.bleInspectionItemService.inspectionItem$.next(this.voltageItem.itemId)
+  public inspectVoltage(currentVoltage: number, validVoltage: number) {
+    if (currentVoltage >= validVoltage) {
+      return {
+        result: true,
+        description: "合格，电池电压高于合法值"
+      }
+    } else {
+      return {
+        result: false,
+        description: `不合格，低于合法电压值${validVoltage}V`
+      }
+    }
   }
 
   //初始化待检测项目信息
@@ -53,7 +64,5 @@ export class VoltageItemInspectionComponent implements OnInit {
     this.bleInspectionItemService.voltageItem.description = null
     this.bleInspectionItemService.voltageItem.currentState = null
     this.bleInspectionItemService.voltageItem.validState = null
-
-    this.bleInspectionItemService.inspectionItem$.next(this.voltageItem.itemId)
   }
 }

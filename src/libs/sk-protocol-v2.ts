@@ -283,14 +283,18 @@ export class SkProtocolV2 {
         for (let i = 0; i < 6; i++) {
           const fs: FaceState = new Array<Color>() as FaceState
           for (let j = 0; j < 9; j++) {
-            fs[j] = payload.readUInt8(i * 9 + j)
+            const val = payload.readUInt8(Math.floor((i * 9 + j) / 2))
+            const isEven = (i * 9 + j) % 2 == 0
+            fs[j] = (val >> (isEven ? 0 : 4)) & 0x0f
           }
           cubeState.push(fs)
         }
         res.state = cubeState
         const pause = new Array<number>();
         for (let i = 0; i < 6; i++) {
-          pause[i] = payload.readInt8(256 + i)
+          const val = payload.readUInt8(27 + Math.floor(i / 2))
+          const isEven = i % 2 == 0
+          pause[i] = (val >> (isEven ? 0 : 4)) & 0x0f
         }
         res.pause = pause;
       }
@@ -372,7 +376,7 @@ export class SkProtocolV2 {
 
   public encodeCommand(cmd: number, isSet: boolean, body: ResolvedCommand = {}): { buffer: Buffer, currId: number } {
     const headerBuff = Buffer.alloc(1);
-    const command = cmd;
+    const command = cmd
     const id = this.getAndIncId()
     const set = isSet ? 1 : 0;
     let header = 0
@@ -478,14 +482,16 @@ export class SkProtocolV2 {
           payloadBuff.writeUInt8(body.sampleMs, 13);
           break;
         } case Command.CUBE_STATE: {
-          payloadBuff = Buffer.alloc(262);
+          payloadBuff = Buffer.alloc(27 + 3);
           for (let i = 0; i < 6; i++) {
             for (let j = 0; j < 9; j++) {
-              payloadBuff.writeUInt8(body.state[i][j], i * 9 + j)
+              const isEven = (i * 9 + j) % 2 == 0
+              payloadBuff[Math.floor((i * 9 + j) / 2)] |= (body.state[i][j] & 0x0f) << (isEven ? 0 : 4)
             }
           }
           for (let i = 0; i < 6; i++) {
-            payloadBuff.writeInt8(body.pause[i], 256 + i)
+            const isEven = i % 2 == 0
+            payloadBuff[Math.floor(i / 2)] |= (body.pause[i] & 0x0f) << (isEven ? 0 : 4)
           }
           break;
         } case Command.OTA: {

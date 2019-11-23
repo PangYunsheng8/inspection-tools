@@ -1,8 +1,15 @@
-<el-collapse [model]="[0]" [accordion]="true" (modelChange)="selectionChange($event)" v-model="0">
+<el-collapse [model]="currStep" [accordion]="true">
+    <div class="item-container">
+        <svg class="icon" aria-hidden="true"><use [attr.href]="attitudeIcon"></use></svg>
+        <el-collapse-item label="检测姿态" value="0">
+            <app-attitude-item-inspection (finishedEvent)="attitudeInspFinished($event)"></app-attitude-item-inspection>
+        </el-collapse-item>
+    </div>
+
     <div class="item-container">
         <svg class="icon" aria-hidden="true"><use [attr.href]="axisIcon"></use></svg>
-        <el-collapse-item label="检测6个侧面轴" value="1">
-            <app-axis-item-inspection (finishedEvent)="finishedEvent($event)"></app-axis-item-inspection>
+        <el-collapse-item label="检测6个侧面轴" value="1">  
+            <app-axis-item-inspection (finishedEvent)="axisInspFinished($event)"></app-axis-item-inspection>
         </el-collapse-item>
     </div>
 </el-collapse>

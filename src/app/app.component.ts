@@ -16,11 +16,13 @@ export class AppComponent implements OnInit{
   }
 
   public openDeviceDetails() {
+    this.menu.enable(false, 'settings')
     this.menu.enable(true, 'device-details');
     this.menu.open('device-details');
   }
 
   public openSettings() {
+    this.menu.enable(false, 'device-details')
     this.menu.enable(true, 'settings');
     this.menu.open('settings');
   }

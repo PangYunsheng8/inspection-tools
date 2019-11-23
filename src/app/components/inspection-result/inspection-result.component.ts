@@ -1,10 +1,23 @@
 import { Component, OnInit } from '@angular/core';
-import { InspectionStaticItem } from '../../class/inspection-static-item';
-import { InspectionDynamicItem } from '../../class/inspection-dynamic-item';
-import { BleInspectionItemService } from '../../services/ble-inspection-item.service';
+import { Subscription } from 'rxjs';
+import { CubeState, Color } from 'src/libs/cube-state';
+import { ElMessageService } from 'element-angular';
 import { BleStateService } from '../../services/ble-state.service';
+import { BleCommandService } from '../../services/ble-command.service';
+import { CubeRotateService } from '../../services/cube-rotate.service';
+import { CalibrationParam } from 'src/libs/sk-protocol-v2';
+import { StaticService } from '../../services/static.service';
 
-const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白',]
+const SLEEP_STATE: number = 2
+
+const ORIGIN_CUBE: CubeState = [
+  [Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y, Color.Y],
+  [Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O, Color.O],
+  [Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B, Color.B],
+  [Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R, Color.R],
+  [Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G, Color.G],
+  [Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W, Color.W]
+]
 
 @Component({
   selector: 'app-inspection-result',
@@ -14,61 +27,80 @@ const AXIS_COLOR_MAP = ['黄', '橘', '蓝', '红', '绿', '白',]
 export class InspectionResultComponent implements OnInit {
 
   constructor(
-    private bleInspectionItemService: BleInspectionItemService,
+    private message: ElMessageService,
     private bleStateService: BleStateService,
+    private bleCommandService: BleCommandService,
+    private cubeRotateService: CubeRotateService,
+    private staticService: StaticService
   ) { }
 
-  public notInspectedItems: Array<any> = new Array()
-  public InspectedValidItems: Array<any> = new Array()
-  public InspectedInvalidItems: Array<any> = new Array()
+  //视图魔方与手中的魔方是否一致
+  public inspRes: boolean
+  //魔方是否为还原态
+  public recover: boolean
+  public isInspected: boolean = false
 
-  public inspectionItems: Array<any> = new Array<any>()
+  //倒计时定时器和倒计时开始时间
+  public timer: NodeJS.Timer
+  public seconds: number = 3
 
   ngOnInit() {
-    this.initInspectionItem()
-
-    for (let i = 0; i < this.inspectionItems.length; i++){
-      this.notInspectedItems.push(this.inspectionItems[i])
-    }
-
     this.bleStateService.connectionStatus$.subscribe(connected => {
-      if (!connected) {
-        this.initInspectionItem()
+      if (!connected) {  //如果魔方断开连接，清空变量
+        this.inspRes = null
+        this.recover = null
+        this.isInspected = false
+        this.seconds = 3
+        if (this.timer) clearInterval(this.timer)
       }
     })
+  }
 
-    this.bleInspectionItemService.inspectionItem$.subscribe(id => {
-      let isInspected = this.inspectionItems[id].isInspected
-      let result = this.inspectionItems[id].inspectionResult
-      if (isInspected) {
-        this.notInspectedItems = this.notInspectedItems.filter(i => i.itemId != id)
-        if (result) this.InspectedValidItems.push(this.inspectionItems[id])
-        else this.InspectedInvalidItems.push(this.inspectionItems[id])
-      } else {
-        this.InspectedValidItems = this.InspectedValidItems.filter(i => i.itemId != id)
-        this.InspectedInvalidItems = this.InspectedInvalidItems.filter(i => i.itemId != id)
+  //检查一致的事件处理函数
+  public async doConsistent() {
+    this.inspRes = true
+    this.isInspected = true
+    await this.checkCubeState()
+  }
 
-        if (this.notInspectedItems.filter(i => i.itemId == id).length == 0)
-          this.notInspectedItems.push(this.inspectionItems[id])
+  //检查不一致的事件处理函数
+  public doInConsistent() {  
+    this.inspRes = false
+    this.isInspected = true
+  }
+
+  //重新选择的事件处理函数
+  public doReChoose() {
+    this.isInspected = false
+    this.inspRes = null
+    this.recover = null
+    this.seconds = 3
+    if (this.timer) clearInterval(this.timer)
+  }
+
+  //检查魔方是否为还原态
+  public async checkCubeState() {
+    let { state } = await this.bleCommandService.getCubeState()
+    if (state.toString() !== ORIGIN_CUBE.toString()) {
+      this.message['warning']('检测到魔方未还原，请还原魔方！！')
+    } else {
+      this.recover = true
+      this.disConnect()
+    }
+  }
+
+  //通过写入魔方的睡眠状态为2来断开连接
+  public disConnect() {
+    this.timer = setInterval(async () => {
+      this.seconds -= 1
+      if (this.seconds === 0) {
+        clearInterval(this.timer)
+        try {
+          await this.bleCommandService.setSleepState(SLEEP_STATE)
+        } catch(err) {
+          console.log(err)
+        }
       }
-    }, err => console.log(err)) 
+    }, 1000)
   }
-
-  public initInspectionItem() {
-    this.inspectionItems = [
-      this.bleInspectionItemService.faceItem0,
-      this.bleInspectionItemService.faceItem1,
-      this.bleInspectionItemService.faceItem2,
-      this.bleInspectionItemService.faceItem3,
-      this.bleInspectionItemService.faceItem4,
-      this.bleInspectionItemService.faceItem5,
-      this.bleInspectionItemService.voltageItem,
-      this.bleInspectionItemService.cstateItem,
-      this.bleInspectionItemService.sensorsItem,
-      this.bleInspectionItemService.filterItem,
-      this.bleInspectionItemService.identityItem,
-      this.bleInspectionItemService.oadItem
-    ]
-  }
-
 }
